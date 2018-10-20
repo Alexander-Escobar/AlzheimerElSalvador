@@ -1,0 +1,20 @@
+{
+  "name": "alzheimer",
+  "version": "1.0.0",
+  "description": "Asociacion Alzheimer El Salvador, sin fines de lucro",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Alzheimer",
+    "salud",
+    "cuidados"
+  ],
+  "author": "Vuxmi.com | Alexander.Enrique.Escobar@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "mysql": "^2.16.0",
+    "stringbuilder": "0.0.11"
+  }
+}
