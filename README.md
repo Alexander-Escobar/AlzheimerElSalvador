@@ -10,3 +10,13 @@ El sitio ha sido desarrollado con las siguientes tecnologias
 * BootStrap
 * MySQL
 * Node.JS
+
+Dependencias
+* stringbuilder
+* formidable
+* nodemailer
+
+Librerias Auxiliares
+* validetta
+* toast
+* animate
