@@ -101,6 +101,91 @@ exports.GetHTML = function(a_sb_body, resp)
 	});
 }
 
+exports.GetHTMLsys = function(a_sb_body, resp)
+{
+	if (settings.servConfig.debug){console.log("Procesando HttpMsgs GetHTML");}
+	
+	var html = new StringBuilder()
+	, head = new StringBuilder({ newline: '\r\n\t' }) // add a tab at the end 
+	, l_sb_NavBar = new StringBuilder({ newline: '\r\n\t' }) // add a tab at the end 
+	, l_sb_Adds = new StringBuilder({ newline: '\r\n\t' }) // add a tab at the end
+	, l_sb_Analytics = new StringBuilder({ newline: '\r\n\t' }) // add a tab at the end
+	;
+
+	var initTag, endTag, attr;
+ 
+	initTag = '<{0}>';
+	endTag = '</{0}>';
+	attr = '{0}="{1}"';
+
+	// [12]	flexdatalist			
+	// [13] dataTables				
+	// [14] dataTables, buttons		
+	// [15] dataTables, select		
+	// [16] Validetta / Validaciones
+	// [33]	sweetalert.min.js Alertas			
+	// [36]	flexdatalist						
+	// [37] dataTables							
+	// [38] dataTables / Button					
+	// [39] dataTables / Select					
+	// [40] dataTables / Export Flash			
+	// [41] dataTables / Export jszip			
+	// [42] dataTables / Export pdfmake			
+	// [43] dataTables / Export vfs_fonts		
+	// [44] dataTables / Export buttons html5	
+	// [45] dataTables / Export buttons print	
+	// [46] js Ctrl Values						
+	// [47] js Get Values						
+	// [48] Validetta / Validaciones			
+	// [49] Validetta / validettaLang-es-ES
+
+	exports.showHead(head, [0,1,2,3,4,5,7,8,9,10,30,31,32,35,37,13,14,38,15,39,40,41,42,43,44,45,33,46,47,48,16,49]);
+	exports.showNabBar(l_sb_NavBar);
+	exports.showAdds(l_sb_Adds, "A");
+	exports.showAnalytics(l_sb_Analytics);
+	
+	// Creando la pagina HTML 
+	html
+		.appendLine('<!DOCTYPE html>')
+		.appendLine('<html {0}>', attr.format('lang', 'en'))
+		
+		// <head>
+		.appendLine(initTag.format('head'))
+		.append(head)
+		.appendLine('<style>')
+		.appendLine('td.highlight {')
+		.appendLine('background-color: whitesmoke !important;')
+		.appendLine('}</style>')
+		.appendLine(endTag.format('head'))
+		// </head>
+		
+		// <body>
+		.appendLine(initTag.format('body'))
+
+		// SideBar
+		.appendLine('<div class="bg-dark" >')
+		.append(l_sb_NavBar)
+		.appendLine('</div>')
+
+		// <Body Area>
+		.appendLine('    <div class="container">')
+		.append(a_sb_body)
+		.appendLine('    </div>')
+		// </Body Area>
+		
+		.appendLine(endTag.format('body'))					
+		// </body>
+		.append(endTag.format('html'));						// end HTML
+ 
+	html.build(function(err, result)
+	{
+		if (err) return console.log("ERROR:" + err);
+		resp.writeHead(200, {"Content-Type":"text/html"});
+		resp.write(result)
+		resp.end();
+	});
+}
+
 exports.showAdds = function(a_sb_adds, a_type)
 {
 	if (settings.servConfig.debug){console.log("Procesando HttpMsgs showAdds");}
@@ -134,11 +219,19 @@ exports.showAnalytics = function(a_sb_string)
 		.appendLine('</script>');
 }
 
-exports.showHead = function(a_sb_head)
+exports.showHead = function(a_sb_head, a_include_head)
 {
 	if (settings.servConfig.debug){console.log("Procesando HttpMsgs Head");}
 	
 	var initTag, endTag, tag, attr, lorem;
+	var Secue = [0,1,2,3,4,5,7,8,9,10,30,31,32,33];
+	var ls_strng = '';
+ 
+	if ( typeof(a_include_head) !== "undefined" && a_include_head !== null ) 
+	{
+		Secue = a_include_head;
+	}
+	//if ( some_variable != null ) {}
  
 	initTag = '<{0}>';
 	endTag = '</{0}>';
@@ -149,43 +242,50 @@ exports.showHead = function(a_sb_head)
 	a_sb_head
 		// <!-- Meta -->
 		.appendLine(tag.format('title', settings.Title))
-		.appendLine('<meta {0}>', attr.format('charset', 'UTF-8'))
-		.appendLine('<meta {0} {1}>', attr.format('name', 'viewport'), attr.format('content', 'width=device-width, initial-scale=1, shrink-to-fit=no'))
-		.appendLine('<meta {0} {1} >', attr.format('name', 'description'),attr.format('content', settings.Description))
-		.appendLine('<meta {0} {1} >', attr.format('name', 'keywords'),attr.format('content', settings.keywords))
-		.appendLine('<meta {0} {1} >', attr.format('name', 'author'),attr.format('content', settings.author))
-		//.appendLine('<meta {0} {1} >', attr.format('http-equiv', 'Cache-Control'),attr.format('content', settings.httpConfig.cache_control))
 
-		// <!-- CSS -->
-		// font-awesome.css		[local] V 4.7 editado
-		// animate.css			[nube]	V 3.6.2 https://raw.githubusercontent.com/daneden/animate.css/master/animate.css
-		// bootstrap.min.css	[nube] V 4.1.2
-		// style.css			[local]
+
 		
-		//<link href="./css/font-awesome.css" rel="stylesheet">
-		.appendLine('<link {0} {1}>', attr.format('rel', 'stylesheet'), attr.format('href', '/css/font-awesome.css'))
-		.appendLine('<link {0} {1}>', attr.format('rel', 'stylesheet'), attr.format('href', '/css/animate.css'))
-		
-		// Bootstrap Version Standar
-		//.appendLine('<link {0} {1}>', attr.format('rel', 'stylesheet'), attr.format('href', 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css'))
-		.appendLine('<link {0} {1}>', attr.format('rel', 'stylesheet'), attr.format('href', 'https://stackpath.bootstrapcdn.com/bootswatch/4.1.2/materia/bootstrap.min.css'))
-		.appendLine('<link {0} {1}>', attr.format('rel', 'stylesheet'), attr.format('href', '/css/style.css'))
-		
-		// <!-- JavaScript -->
-		// jquery-3.3.1.min.js	[nube] V 3.3.1
-		// popper.js			[nube] V 1.14.3
-		// bootstrap.min.js		[nube] V 4.1.2
-		// sweetalert.min.js	[nube]
-		// sidebar				[local] Barra de Menu Lateral "SideBar Menu"
-		// holder.js			[local] v 2.9.0+f2dkw Manejo de Imagenes
-		
-		//.appendLine('<script {0} {1}></script>', attr.format('src', '/js/jquery-3.2.1.min.js'), attr.format('type', 'text/javascript'))
-		.appendLine('<script {0} {1}></script>', attr.format('src', 'https://code.jquery.com/jquery-3.3.1.slim.min.js'), attr.format('type', 'text/javascript'))
-		.appendLine('<script {0} {1}></script>', attr.format('src', 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js'), attr.format('type', 'text/javascript'))
-		.appendLine('<script {0} {1}></script>', attr.format('src', 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js'), attr.format('type', 'text/javascript'))
-		//.appendLine('<script {0} {1}></script>', attr.format('src', 'https://unpkg.com/sweetalert/dist/sweetalert.min.js'), attr.format('type', 'text/javascript'))
-		.appendLine('<script {0} {1}></script>', attr.format('src', '/js/holder.min.js'), attr.format('type', 'text/javascript'))
-		
+		for (var i=0; i < Secue.length; i++)
+		{
+			ls_strng = '';
+			
+			//ls_strng = settings.httpConfig.headers[Secue[i]].type
+			
+			for (var j=0; j < settings.httpConfig.headers[Secue[i]].dataPair.length; j++)
+			{
+				ls_strng = ls_strng + " " + attr.format(settings.httpConfig.headers[Secue[i]].dataPair[j][0],settings.httpConfig.headers[Secue[i]].dataPair[j][1]);
+			}
+			
+			switch(settings.httpConfig.headers[Secue[i]].type) 
+			{
+			  case "meta":
+				tag = '<meta {0}>';
+				break;
+			  case "link":
+				tag = '<link {0}>';
+				break;
+			  case "script":
+				tag = '<script {0}></script>';
+				break;
+			  default:
+				// code block
+			}
+			a_sb_head
+				.appendLine(tag, ls_strng)
+			
+			//a_sb_head
+			//.appendLine('<'+settings.httpConfig.headers[Secue[i]].type+' {0}>', attr.format('charset', 'UTF-8'))
+			
+			//if ( i == )
+			//{
+			//	settings.httpConfig.headers[i]
+			//	
+			//	if (a_metadata.columns[j].hasOwnProperty('remote_check'))
+			//}
+		}
+
+	a_sb_head
+		.appendLine('<!-- x -->')
 		.appendLine('');
 }
 
@@ -200,48 +300,46 @@ exports.showNabBar = function(a_sb_NavBar)
 	attr = '{0}="{1}"';
 
 	exports.GooSearch(l_sb_GooSearchNavBar);
-	
+
 	a_sb_NavBar
-.appendLine('<nav class="navbar navbar-expand-lg navbar-dark ">') // bg-dark
-.appendLine('  <span class="navbar-brand mb-0 h1 animated rotateIn"><img src="/img/avatar.png" width="25" height="25" class="d-inline-block align-top" alt="">Alzheimer<span class="badge badge-pill badge-secondary">El Salvador</span></span>')
+		.appendLine('<nav class="navbar navbar-expand-lg navbar-dark ">') // bg-dark
+		.appendLine('  <span class="navbar-brand mb-0 h1 animated rotateIn"><img src="/img/avatar.png" width="25" height="25" class="d-inline-block align-top" alt="">Alzheimer<span class="badge badge-pill badge-secondary">El Salvador</span></span>')
 
+		.appendLine('  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">')
+		.appendLine('    <span class="navbar-toggler-icon"></span>')
+		.appendLine('  </button>')
+		.appendLine('')
+		.appendLine('  <div class="collapse navbar-collapse" id="navbarColor02">')
+		.appendLine('    <ul class="navbar-nav mr-auto">')
+		.appendLine('      <li class="nav-item active">')
+		.appendLine('        <a class="nav-link" href="/"><i class="fa fa-home" aria-hidden="true"></i> Home</a>')
+		.appendLine('      </li>')
+		.appendLine('      <li class="nav-item">')
+		.appendLine('        <a class="nav-link" href="/boletin"><i class="fa fa-bullhorn" aria-hidden="true"></i> Boletin</a>')
+		.appendLine('      </li>')
+		//.appendLine('      <li class="nav-item">')
+		//.appendLine('        <a class="nav-link" href="/evento"><i class="fa fa-calendar" aria-hidden="true"></i> Eventos</a>')
+		//.appendLine('      </li>')
+		.appendLine('      <li class="nav-item">')
+		.appendLine('        <a class="nav-link" href="/donacion"><i class="fa fa-heart" aria-hidden="true"></i> Donaciones</a>')
+		.appendLine('      </li>')
+		.appendLine('      <li class="nav-item">')
+		.appendLine('        <a class="nav-link" href="/contacto"><i class="fa fa-map-marker" aria-hidden="true"></i> Contáctanos</a>')
+		.appendLine('      </li>')
+		.appendLine('      <li class="nav-item">')
+		.appendLine('        <a class="nav-link" target="_blank" href="https://www.facebook.com/Alzheimer-El-Salvador-256581527700226/"><i class="fa fa-facebook" aria-hidden="true"></i> Facebook</a>')
+		.appendLine('      </li>')
+		.appendLine('      <li class="nav-item">')
+		.appendLine('        <a class="nav-link" target="_blank" href="https://www.youtube.com/channel/UC-9qz9aOLouMEmYMmS2Vw_g"><i class="fa fa-youtube" aria-hidden="true"></i> YouTube</a>')
+		.appendLine('      </li>')
+		.appendLine('    </ul>')
+		.appendLine('	<div id="searchGoogle" class="collapse">')
+		.append(l_sb_GooSearchNavBar)
+		.appendLine('	</div>')
+		.appendLine('	<button type="button" class="btn btn-dark" data-toggle="collapse" data-target="#searchGoogle" onclick="this.style.display = \'none\'"><i class="fa fa-search"></i></button>')
 
-.appendLine('  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">')
-.appendLine('    <span class="navbar-toggler-icon"></span>')
-.appendLine('  </button>')
-.appendLine('')
-.appendLine('  <div class="collapse navbar-collapse" id="navbarColor02">')
-.appendLine('    <ul class="navbar-nav mr-auto">')
-.appendLine('      <li class="nav-item active">')
-.appendLine('        <a class="nav-link" href="/"><i class="fa fa-home" aria-hidden="true"></i> Home</a>')
-.appendLine('      </li>')
-//.appendLine('      <li class="nav-item">')
-//.appendLine('        <a class="nav-link" href="/boletin"><i class="fa fa-bullhorn" aria-hidden="true"></i> Boletin</a>')
-//.appendLine('      </li>')
-//.appendLine('      <li class="nav-item">')
-//.appendLine('        <a class="nav-link" href="/evento"><i class="fa fa-calendar" aria-hidden="true"></i> Eventos</a>')
-//.appendLine('      </li>')
-.appendLine('      <li class="nav-item">')
-.appendLine('        <a class="nav-link" href="/donacion"><i class="fa fa-heart" aria-hidden="true"></i> Donaciones</a>')
-.appendLine('      </li>')
-.appendLine('      <li class="nav-item">')
-.appendLine('        <a class="nav-link" href="/contacto"><i class="fa fa-map-marker" aria-hidden="true"></i> Contactanos</a>')
-.appendLine('      </li>')
-.appendLine('      <li class="nav-item">')
-.appendLine('        <a class="nav-link" target="_blank" href="https://www.facebook.com/Alzheimer-El-Salvador-256581527700226/"><i class="fa fa-facebook" aria-hidden="true"></i> Facebook</a>')
-.appendLine('      </li>')
-.appendLine('      <li class="nav-item">')
-.appendLine('        <a class="nav-link" target="_blank" href="https://www.youtube.com/channel/UC-9qz9aOLouMEmYMmS2Vw_g"><i class="fa fa-youtube" aria-hidden="true"></i> YouTube</a>')
-.appendLine('      </li>')
-.appendLine('    </ul>')
-.appendLine('	<div id="searchGoogle" class="collapse">')
-.append(l_sb_GooSearchNavBar)
-.appendLine('	</div>')
-.appendLine('	<button type="button" class="btn btn-dark" data-toggle="collapse" data-target="#searchGoogle" onclick="this.style.display = \'none\'"><i class="fa fa-search"></i></button>')
-
-
-.appendLine('  </div>')
-.appendLine('</nav>')
+		.appendLine('  </div>')
+		.appendLine('</nav>')
 ;
 }
 
@@ -283,7 +381,7 @@ exports.showFooter = function(a_sb_bodyFooter)
 		.appendLine('')
 		.appendLine('						<!-- Address -->')
 		.appendLine('						<div class="col-md-4 map-img md-margin-bottom-40">')
-		.appendLine('							<div class="headline"><h2>Contactanos</h2></div>')
+		.appendLine('							<div class="headline"><h2>Contáctanos</h2></div>')
 		.appendLine('							<address class="md-margin-bottom-40">')
 		.appendLine('								San Salvador, SS <br />')
 		.appendLine('								El Salvador, Centro America <br />')
@@ -362,9 +460,9 @@ exports.showHome = function(a_req, a_resp, a_data)
 		// SideBar / Barra de Encabezado, Barra de Navegacion  
 			.appendLine('  <nav class="sidebar-nav animated slideInDown" role="navigation">')
 			.appendLine('    <ul>')
-			//.appendLine('      <li class="sidebar-nav-item moe">')
-			//.appendLine('        <i class="sidebar-nav-item-icon fa fa-bullhorn"></i><a class="sidebar-nav-item-zelda moe" href="/boletin">Boletin</a>')
-			//.appendLine('      </li>')
+			.appendLine('      <li class="sidebar-nav-item moe">')
+			.appendLine('        <i class="sidebar-nav-item-icon fa fa-bullhorn"></i><a class="sidebar-nav-item-zelda moe" href="/boletin">Boletin</a>')
+			.appendLine('      </li>')
 			//.appendLine('      <li class="sidebar-nav-item moe">')
 			//.appendLine('        <i class="sidebar-nav-item-icon fa fa-calendar"></i><a class="sidebar-nav-item-zelda moe" href="/evento">Eventos</a>')
 			//.appendLine('      </li>')
@@ -372,7 +470,7 @@ exports.showHome = function(a_req, a_resp, a_data)
 			.appendLine('        <i class="sidebar-nav-item-icon fa fa-heart"></i><a class="sidebar-nav-item-zelda moe" href="/donacion">Donaciones</a>')
 			.appendLine('      </li>')
 			.appendLine('      <li class="sidebar-nav-item moe">')
-			.appendLine('        <i class="sidebar-nav-item-icon fa fa-map-marker"></i><a class="sidebar-nav-item-zelda moe" href="/contacto">Contactanos</a>')
+			.appendLine('        <i class="sidebar-nav-item-icon fa fa-map-marker"></i><a class="sidebar-nav-item-zelda moe" href="/contacto">Contáctanos</a>')
 			.appendLine('      </li>')
 			.appendLine('      <li class="sidebar-nav-item moe">') //active
 			//.appendLine('        <i class="sidebar-nav-item-icon fa fa-facebook"></i><a class="sidebar-nav-item-zelda moe" href="https://www.w3schools.com">Facebook</a>')
@@ -454,48 +552,44 @@ exports.showHome = function(a_req, a_resp, a_data)
 			//.appendLine('        </div>')
 			//.appendLine('')
 	        //
-        .appendLine('<div class="collapse miniblock" id="demo">')
-        .appendLine('    <!--<h3 class="text-left">Conoce Mas de Nosotros</h3>-->')
-        .appendLine('    <ul class="nav nav-tabs">')
-        .appendLine('        <li class="active"><a data-toggle="tab" href="#Grupo">Nuestros Datos</a></li>')
-        .appendLine('        <li><a data-toggle="tab" href="#Mision">Mision</a></li>')
-        .appendLine('        <li><a data-toggle="tab" href="#Vision">Vision</a></li>')
-        .appendLine('    </ul>')
-        .appendLine('')
-        .appendLine('    <div class="tab-content">')
-        .appendLine('        <div id="Grupo" class="tab-pane fade in active">')
-        .appendLine('            <h2 class="text_intro">Grupo de Apoyo Alzheimer</h2>')
-        .appendLine('            <p class="text_intro">')
-        .appendLine('                Reuniones mensuales: último sábado de cada mes<br />')
-        .appendLine('                Lugar: Auditorio del Hospital Policlínico Arce del ISSS<br />')
-        .appendLine('                Hora: 8:00 am a 12:00 md.<br />')
-        .appendLine('                San Salvador<br />')
-        .appendLine('                Tel.: (503) 2237-0787 Oficina<br />')
-        .appendLine('                Cel.: (503) 7947-4979 WhatsApp<br />')
-        .appendLine('            </p>')
-        .appendLine('        </div>')
-        .appendLine('        <div id="Mision" class="tab-pane fade">')
-        .appendLine('            <h2 class="text_intro">Nuestra Misión</h2>')
-        .appendLine('            <p class="text_intro text-justify">Somos una Asociación <b>NO</b> Gubernamental sin Fines de Lucro con la finalidad de impulsar la atención integral y especializada en Alzheimer y otras demencias mediante investigaciones sobre Alzheimer, la planificación, organización y coordinación de programas y servicios de apoyo a pacientes, familias, cuidadores y sociedad en general.</p>')
-        .appendLine('        </div>')
-        .appendLine('        <div id="Vision" class="tab-pane fade">')
-        .appendLine('            <h2 class="text_intro">Nuestra Visión</h2>')
-        .appendLine('            <p class="text_intro text-justify">')
-        .appendLine('                La Asociación de Familiares de pacientes Alzheimer de El Salvador tiene la visión de contribuir al reto de tratar e informar sobre la enfermedad de Alzheimer y las demencias en general y a mejorar la calidad de vida tanto de pacientes como de las familias y cuidadores afectados.')
-        .appendLine('                Así mismo La Asociación de Familiares de pacientes Alzheimer de El Salvador trata de ser una Entidad en el tratamiento, investigación, manejo y la prevención de esta enfermedad organizando grupos de apoyo en la sociedad salvadoreña y así fortalecer nuestra organización con pilares sólidos representativos y transparentes en la prestación y creación de servicios de calidad para los afectados.')
-        .appendLine('            </p>')
-        .appendLine('        </div>')
-        .appendLine('    </div>')
-        .appendLine('</div>')
-
-
-		for (var i=0; i < a_data.length; i++)
-		{
 			
-		}
+        //.appendLine('<div class="collapse miniblock" id="demo">')
+		//.appendLine('<div class="tab-pane fade active show" id="demo">')
+        //.appendLine('    <!--<h3 class="text-left">Conoce Mas de Nosotros</h3>-->')
+        //.appendLine('    <ul class="nav nav-tabs">')
+        //.appendLine('        <li class="active"><a data-toggle="tab" href="#Grupo">Nuestros Datos</a></li>')
+        //.appendLine('        <li><a data-toggle="tab" href="#Mision">Mision</a></li>')
+        //.appendLine('        <li><a data-toggle="tab" href="#Vision">Vision</a></li>')
+        //.appendLine('    </ul>')
+        //.appendLine('')
+        //.appendLine('    <div class="tab-content">')
+        //.appendLine('        <div id="Grupo" class="tab-pane fade in active">')
+        //.appendLine('            <h2 class="text_intro">Grupo de Apoyo Alzheimer</h2>')
+        //.appendLine('            <p class="text_intro">')
+        //.appendLine('                Reuniones mensuales: último sábado de cada mes<br />')
+        //.appendLine('                Lugar: Auditorio del Hospital Policlínico Arce del ISSS<br />')
+        //.appendLine('                Hora: 8:00 am a 12:00 md.<br />')
+        //.appendLine('                San Salvador<br />')
+        //.appendLine('                Tel.: (503) 2237-0787 Oficina<br />')
+        //.appendLine('                Cel.: (503) 7947-4979 WhatsApp<br />')
+        //.appendLine('            </p>')
+        //.appendLine('        </div>')
+        //.appendLine('        <div id="Mision" class="tab-pane fade">')
+        //.appendLine('            <h2 class="text_intro">Nuestra Misión</h2>')
+        //.appendLine('            <p class="text_intro text-justify">Somos una Asociación <b>NO</b> Gubernamental sin Fines de Lucro con la finalidad de impulsar la atención integral y especializada en Alzheimer y otras demencias mediante investigaciones sobre Alzheimer, la planificación, organización y coordinación de programas y servicios de apoyo a pacientes, familias, cuidadores y sociedad en general.</p>')
+        //.appendLine('        </div>')
+        //.appendLine('        <div id="Vision" class="tab-pane fade">')
+        //.appendLine('            <h2 class="text_intro">Nuestra Visión</h2>')
+        //.appendLine('            <p class="text_intro text-justify">')
+        //.appendLine('                La Asociación de Familiares de pacientes Alzheimer de El Salvador tiene la visión de contribuir al reto de tratar e informar sobre la enfermedad de Alzheimer y las demencias en general y a mejorar la calidad de vida tanto de pacientes como de las familias y cuidadores afectados.')
+        //.appendLine('                Así mismo La Asociación de Familiares de pacientes Alzheimer de El Salvador trata de ser una Entidad en el tratamiento, investigación, manejo y la prevención de esta enfermedad organizando grupos de apoyo en la sociedad salvadoreña y así fortalecer nuestra organización con pilares sólidos representativos y transparentes en la prestación y creación de servicios de calidad para los afectados.')
+        //.appendLine('            </p>')
+        //.appendLine('        </div>')
+        //.appendLine('    </div>')
+        //.appendLine('</div>')
 	}
 
-	exports.GetHTMLStandar(l_block, a_resp, 200, "");
+	exports.GetHTMLStandar(l_block, a_resp, 200, "", [0,1,2,3,4,5,7,8,9]); //
 }	//ShowHOME
 
 exports.showStaticPage = function(a_req, a_resp, a_data)
@@ -563,254 +657,6 @@ exports.showBoletinList = function(a_req, a_resp, a_data)
 
 	//var sb = new StringBuilder({newline: "\r\n"});
 	var l_block = new StringBuilder({ newline: '\r\n\t' }); // add a tab at the end
-	var l_i = 0;
-
-	if (a_data)
-	{
-		for (var i=0; i < a_data.length; i++)
-		{
-			if (l_i == 0) 
-			{
-				l_block.append('\t')
-					.appendLine('<div class="card-deck">');
-			}
-		
-			l_block
-				.appendLine('	<div class="card">')
-				//.appendLine('		<img class="card-img-top rounded" src="' + a_data[i].imagen + '" alt="Card image cap" >')
-				.appendLine('		<div class="card-body">')
-				.appendLine('			<h5 class="card-title">' + a_data[i].titulo + '</h5>')
-				//.appendLine('			<span class="badge badge-secondary">'+ a_data[i].volumen +'</span>')
-				//.appendLine('			<small class="text-muted">' + a_data[i].autor + '</small>')
-				//.appendLine('			<p class="card-text">' + a_data[i].introduccion.substring(0, 200) + '...</p>')
-				.appendLine('		</div>')
-				.appendLine('		<div class="card-footer">')
-				.appendLine('			<a href="/categoria/' + a_data[i].id + '" class="btn btn-primary"><span class="fa fa-book"></span> ' + a_data[i].titulo + '</a>')
-				.appendLine('		</div>')
-				.appendLine('	</div>');
-			
-			l_i++;
-			
-			if (l_i == 3)
-			{
-				l_block.appendLine('</div><hr>'); //"card-deck"
-				l_i = 0;
-			}
-			
-		}
-	}
-
-	if (l_i != 0)
-	{
-		for (var l_x=0; l_x < 3 - l_i; l_x++)
-		{
-			l_block
-				.appendLine('  <div class="card">')
-				.appendLine('  </div>');
-		}
-		l_block.appendLine('</div>');	//"card-deck"
-	}
-	
-l_block
-.appendLine('    <div class="container">')
-.appendLine('      <header class="blog-header py-3">')
-.appendLine('        <div class="row flex-nowrap justify-content-between align-items-center">')
-.appendLine('          <div class="col-4 pt-1">')
-.appendLine('            <a class="text-muted" href="/boletin"><i class="fa fa-home fa-2x" aria-hidden="true"></i></a>')
-.appendLine('          </div>')
-.appendLine('          <div class="col-4 text-center">')
-.appendLine('            <a class="blog-header-logo text-dark" href="/">Alzheimer<span class="badge badge-pill badge-secondary">El Salvador</span></a>')
-.appendLine('          </div>')
-.appendLine('          <div class="col-4 d-flex justify-content-end align-items-center">')
-//.appendLine('            <a class="btn btn-sm btn-outline-secondary" href="#">Subscribe</a>')
-//.appendLine('            <a class="btn btn-sm btn-outline-secondary" href="#">Sign up</a>')
-.appendLine('          </div>')
-.appendLine('        </div>')
-.appendLine('      </header>')
-.appendLine('')
-.appendLine('  <br>')
-.appendLine('')
-.appendLine('      <div class="jumbotron p-3 p-md-5 text-white rounded bg-dark">')
-.appendLine('        <div class="col-md-6 px-0">')
-.appendLine('          <h1 class="display-4 font-italic">Title of a longer featured blog post</h1>')
-.appendLine('          <p class="lead my-3">Multiple lines of text that form the lede, informing new readers quickly and efficiently about whats most interesting in this posts contents.</p>')
-.appendLine('          <p class="lead mb-0"><a href="#" class="text-white font-weight-bold">Continue reading...</a></p>')
-.appendLine('        </div>')
-.appendLine('      </div>')
-.appendLine('')
-.appendLine('      <div class="row mb-2">')
-.appendLine('        <div class="col-md-6">')
-.appendLine('          <div class="card flex-md-row mb-4 box-shadow h-md-250">')
-.appendLine('            <div class="card-body d-flex flex-column align-items-start">')
-.appendLine('              <strong class="d-inline-block mb-2 text-primary">World</strong>')
-.appendLine('              <h3 class="mb-0">')
-.appendLine('                <a class="text-dark" href="#">Featured post</a>')
-.appendLine('              </h3>')
-.appendLine('              <div class="mb-1 text-muted">Nov 12</div>')
-.appendLine('              <p class="card-text mb-auto">This is a wider card with supporting text below as a natural lead-in to additional content.</p>')
-.appendLine('              <a href="#">Continue reading</a>')
-.appendLine('            </div>')
-.appendLine('            <img class="card-img-right flex-auto d-none d-lg-block" data-src="holder.js/200x250?theme=thumb" alt="Card image cap">')
-.appendLine('          </div>')
-.appendLine('        </div>')
-.appendLine('        <div class="col-md-6">')
-.appendLine('          <div class="card flex-md-row mb-4 box-shadow h-md-250">')
-.appendLine('            <div class="card-body d-flex flex-column align-items-start">')
-.appendLine('              <strong class="d-inline-block mb-2 text-success">Design</strong>')
-.appendLine('              <h3 class="mb-0">')
-.appendLine('                <a class="text-dark" href="#">Post title</a>')
-.appendLine('              </h3>')
-.appendLine('              <div class="mb-1 text-muted">Nov 11</div>')
-.appendLine('              <p class="card-text mb-auto">This is a wider card with supporting text below as a natural lead-in to additional content.</p>')
-.appendLine('              <a href="#">Continue reading</a>')
-.appendLine('            </div>')
-.appendLine('            <img class="card-img-right flex-auto d-none d-lg-block" data-src="holder.js/200x250?theme=thumb" alt="Card image cap">')
-.appendLine('          </div>')
-.appendLine('        </div>')
-.appendLine('      </div>')
-.appendLine('    </div>')
-.appendLine('')
-.appendLine('    <main role="main" class="container">')
-.appendLine('      <div class="row">')
-.appendLine('        <div class="col-md-8 blog-main">')
-.appendLine('          <h3 class="pb-3 mb-4 font-italic border-bottom">')
-.appendLine('            From the Firehose')
-.appendLine('          </h3>')
-.appendLine('')
-.appendLine('          <div class="blog-post">')
-.appendLine('            <h2 class="blog-post-title">Sample blog post</h2>')
-.appendLine('            <p class="blog-post-meta">January 1, 2014 by <a href="#">Mark</a></p>')
-.appendLine('')
-.appendLine('            <p>This blog post shows a few different types of content thats supported and styled with Bootstrap. Basic typography, images, and code are all supported.</p>')
-.appendLine('            <hr>')
-.appendLine('            <p>Cum sociis natoque penatibus et magnis <a href="#">dis parturient montes</a>, nascetur ridiculus mus. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Sed posuere consectetur est at lobortis. Cras mattis consectetur purus sit amet fermentum.</p>')
-.appendLine('            <blockquote>')
-.appendLine('              <p>Curabitur blandit tempus porttitor. <strong>Nullam quis risus eget urna mollis</strong> ornare vel eu leo. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>')
-.appendLine('            </blockquote>')
-.appendLine('            <p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>')
-.appendLine('            <h2>Heading</h2>')
-.appendLine('            <p>Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.</p>')
-.appendLine('            <h3>Sub-heading</h3>')
-.appendLine('            <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>')
-.appendLine('            <pre><code>Example code block</code></pre>')
-.appendLine('            <p>Aenean lacinia bibendum nulla sed consectetur. Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa.</p>')
-.appendLine('            <h3>Sub-heading</h3>')
-.appendLine('            <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean lacinia bibendum nulla sed consectetur. Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>')
-.appendLine('            <ul>')
-.appendLine('              <li>Praesent commodo cursus magna, vel scelerisque nisl consectetur et.</li>')
-.appendLine('              <li>Donec id elit non mi porta gravida at eget metus.</li>')
-.appendLine('              <li>Nulla vitae elit libero, a pharetra augue.</li>')
-.appendLine('            </ul>')
-.appendLine('            <p>Donec ullamcorper nulla non metus auctor fringilla. Nulla vitae elit libero, a pharetra augue.</p>')
-.appendLine('            <ol>')
-.appendLine('              <li>Vestibulum id ligula porta felis euismod semper.</li>')
-.appendLine('              <li>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</li>')
-.appendLine('              <li>Maecenas sed diam eget risus varius blandit sit amet non magna.</li>')
-.appendLine('            </ol>')
-.appendLine('            <p>Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis.</p>')
-.appendLine('          </div><!-- /.blog-post -->')
-.appendLine('')
-.appendLine('          <div class="blog-post">')
-.appendLine('            <h2 class="blog-post-title">Another blog post</h2>')
-.appendLine('            <p class="blog-post-meta">December 23, 2013 by <a href="#">Jacob</a></p>')
-.appendLine('')
-.appendLine('            <p>Cum sociis natoque penatibus et magnis <a href="#">dis parturient montes</a>, nascetur ridiculus mus. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Sed posuere consectetur est at lobortis. Cras mattis consectetur purus sit amet fermentum.</p>')
-.appendLine('            <blockquote>')
-.appendLine('              <p>Curabitur blandit tempus porttitor. <strong>Nullam quis risus eget urna mollis</strong> ornare vel eu leo. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>')
-.appendLine('            </blockquote>')
-.appendLine('            <p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>')
-.appendLine('            <p>Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.</p>')
-.appendLine('          </div><!-- /.blog-post -->')
-.appendLine('')
-.appendLine('          <div class="blog-post">')
-.appendLine('            <h2 class="blog-post-title">New feature</h2>')
-.appendLine('            <p class="blog-post-meta">December 14, 2013 by <a href="#">Chris</a></p>')
-.appendLine('')
-.appendLine('            <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean lacinia bibendum nulla sed consectetur. Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>')
-.appendLine('            <ul>')
-.appendLine('              <li>Praesent commodo cursus magna, vel scelerisque nisl consectetur et.</li>')
-.appendLine('              <li>Donec id elit non mi porta gravida at eget metus.</li>')
-.appendLine('              <li>Nulla vitae elit libero, a pharetra augue.</li>')
-.appendLine('            </ul>')
-.appendLine('            <p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>')
-.appendLine('            <p>Donec ullamcorper nulla non metus auctor fringilla. Nulla vitae elit libero, a pharetra augue.</p>')
-.appendLine('          </div><!-- /.blog-post -->')
-.appendLine('')
-.appendLine('          <nav class="blog-pagination">')
-.appendLine('            <a class="btn btn-outline-primary" href="#">Older</a>')
-.appendLine('            <a class="btn btn-outline-secondary disabled" href="#">Newer</a>')
-.appendLine('          </nav>')
-.appendLine('')
-.appendLine('        </div><!-- /.blog-main -->')
-.appendLine('')
-.appendLine('        <aside class="col-md-4 blog-sidebar">')
-.appendLine('          <div class="p-3 mb-3 bg-light rounded">')
-.appendLine('            <h4 class="font-italic">About</h4>')
-.appendLine('            <p class="mb-0">Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>')
-.appendLine('          </div>')
-.appendLine('')
-.appendLine('          <div class="p-3">')
-.appendLine('            <h4 class="font-italic">Archives</h4>')
-.appendLine('            <ol class="list-unstyled mb-0">')
-.appendLine('              <li><a href="#">March 2014</a></li>')
-.appendLine('              <li><a href="#">February 2014</a></li>')
-.appendLine('              <li><a href="#">January 2014</a></li>')
-.appendLine('              <li><a href="#">December 2013</a></li>')
-.appendLine('              <li><a href="#">November 2013</a></li>')
-.appendLine('              <li><a href="#">October 2013</a></li>')
-.appendLine('              <li><a href="#">September 2013</a></li>')
-.appendLine('              <li><a href="#">August 2013</a></li>')
-.appendLine('              <li><a href="#">July 2013</a></li>')
-.appendLine('              <li><a href="#">June 2013</a></li>')
-.appendLine('              <li><a href="#">May 2013</a></li>')
-.appendLine('              <li><a href="#">April 2013</a></li>')
-.appendLine('            </ol>')
-.appendLine('          </div>')
-.appendLine('')
-.appendLine('          <div class="p-3">')
-.appendLine('            <h4 class="font-italic">Elsewhere</h4>')
-.appendLine('            <ol class="list-unstyled">')
-.appendLine('              <li><a href="#">GitHub</a></li>')
-.appendLine('              <li><a href="#">Twitter</a></li>')
-.appendLine('              <li><a href="#">Facebook</a></li>')
-.appendLine('            </ol>')
-.appendLine('          </div>')
-.appendLine('        </aside><!-- /.blog-sidebar -->')
-.appendLine('')
-.appendLine('      </div><!-- /.row -->')
-.appendLine('')
-.appendLine('    </main><!-- /.container -->')
-.appendLine('')
-.appendLine('    <footer class="blog-footer">')
-.appendLine('      <p>Blog template built for <a href="https://getbootstrap.com/">Bootstrap</a> by <a href="https://twitter.com/mdo">@mdo</a>.</p>')
-.appendLine('      <p>')
-.appendLine('        <a href="#">Back to top</a>')
-.appendLine('      </p>')
-.appendLine('    </footer>')
-.appendLine('')
-.appendLine('    <!-- Bootstrap core JavaScript')
-.appendLine('    ================================================== -->')
-.appendLine('    <!-- Placed at the end of the document so the pages load faster -->')
-//.appendLine('    <script>window.jQuery || document.write(\'<script src="/js/jquery-3.3.1.slim.min.js"></script>\')</script>')
-.appendLine('    <script>')
-.appendLine('      Holder.addTheme(\'thumb\', {')
-.appendLine('        bg: \'#55595c\',')
-.appendLine('        fg: \'#eceeef\',')
-.appendLine('        text: "Thumbnail"')
-.appendLine('      });')
-.appendLine('    </script>')
-
-.appendLine('<link href="https://fonts.googleapis.com/css?family=Playfair+Display:700,900" rel="stylesheet">');
-	
-	exports.GetHTMLStandar(l_block, a_resp, 200, "");
-}	//showBoletinList
-
-exports.showPublicacion = function(a_req, a_resp, a_data)
-{
-    if (settings.servConfig.debug){console.log("Procesando HttpMsgs showPublicacion");}
-
-	//var sb = new StringBuilder({newline: "\r\n"});
-	var l_block = new StringBuilder({ newline: '\r\n\t' }); // add a tab at the end
 	var l_isbn10 = '';
 	var l_isbn13 = '';
 	var l_tema = 0;
@@ -818,126 +664,218 @@ exports.showPublicacion = function(a_req, a_resp, a_data)
 	var l_problema = '', l_problema_div = '';
 	var l_problema_nivel = '';
 	
+	var l_sb_NavBar = new StringBuilder({ newline: '\r\n\t' }) // add a tab at the end 
+	exports.showNabBar(l_sb_NavBar);
+	
 	var l_sb_Adds = new StringBuilder({ newline: '\r\n\t' }) // add a tab at the end
 	exports.showAdds(l_sb_Adds, "D");
 	if (settings.servConfig.debug){console.log(a_data);}
 	if (a_data)
 	{
+		console.log(a_data[i]);
+		
+		l_block
+			// SideBar
+			.appendLine('<div  >') // class="bg-dark"
+			.append(l_sb_NavBar)
+			.appendLine('</div>')
+			.appendLine('  <br>')
 		for (var i=0; i < a_data.length; i++)
 		{
-			if (a_data[i].isbn10) {l_isbn10 = a_data[i].isbn10;} else{l_isbn10 = '';}
-			if (a_data[i].isbn13) {l_isbn13 = a_data[i].isbn13;} else{l_isbn13 = '';}
-			l_tema = a_data[i].tema;
-			
-			if (i == 0)
-			{
-				l_problema_nivel = thermometer(a_data[i].cant_respuesta, a_data[i].cant_problema);
-
-				l_block.append('\t')
-					.appendLine('<div class="jumbotron">')
-					.appendLine('	<h1 class="display-4">' + a_data[i].titulo + '</h1>')
-					.appendLine('	<hr class="my-4">')
-					.appendLine('	<div class="inner-results">')
-					.appendLine('		<div class="contact-box center-version">')
-					.appendLine('			<img alt="image" height="50" width="50" class="img-circle" src="'+ a_data[i].imagen +'">')
-					//.appendLine('			<h3 class="m-b-xs"><a href="/libro/'+ a_data[i].id +'">'+ a_data[i].titulo + '</a></h3>')
-					//.appendLine('			<span class="badge badge-pill badge-info">' + a_data[i].autor + '</span>')
-					.appendLine('			<p class="lead">' + a_data[i].autor + '</p>')
-					.appendLine('			<div>' + a_data[i].volumen + ' / <a href="/categoria/' + a_data[i].id_categoria + '">' + a_data[i].catnombre + '</a> / '+ a_data[i].edicion +' / '+ a_data[i].tipnombre +'</div>')
-					.appendLine('			<div> ISBN 10:' + l_isbn10 + '</div>')
-					.appendLine('			<div> ISBN 13:' + l_isbn13 + '</div>')
-					.appendLine('			<br>')
-					.appendLine('			<div>'+ a_data[i].descripcion +'</div>')
-					.appendLine('			<hr class="my-4">')
-					.appendLine('			<div class="contact-box-footer">')
-					.appendLine('				<div class="m-t-xs btn-group">')
-					.appendLine('					<p class="lead"> ' + a_data[i].cant_respuesta + ' Respuestas / ' + a_data[i].cant_problema + ' Problemas en ' + a_data[i].cant_tema + ' Temas ' + l_problema_nivel + '</p>')
-					.appendLine('				</div>')
-					.appendLine('			</div>')
-					.appendLine('		</div>')
-					.appendLine('	</div>')
-					.append(l_sb_Adds)
-					.appendLine('</div>')
-					.appendLine('<div id="TemasAccordion" data-children=".item">')
-					.appendLine('');
-			}
-			
-			if (l_tema_ult != l_tema)
-			{
-				if (l_tema_ult != 0)
-				{
-					l_block
-						// Cerramos el ultimo tema
-						.appendLine('			</tbody>')
-						.appendLine('			</table>')
-						.appendLine('		</div>')	//class="container"
-						
-						.appendLine('		</div>')
-						.appendLine('	</div>');
-						// Cerramos el ultimo tema
-				}
-				
-				l_block
-					// Abrimos un nuevo tema
-					.appendLine('	<div class="item">')
-					.appendLine('		<a data-toggle="collapse" data-parent="#TemasAccordion" href="#TemaAccordion' + a_data[i].id + '" role="button" aria-expanded="true" aria-controls="TemaAccordion' + a_data[i].id + '">')
-					.appendLine('			' + a_data[i].numeracion + ' | ' + a_data[i].tema )
-					.appendLine('		</a>')
-					.appendLine('		<div id="TemaAccordion' + a_data[i].id + '" class="collapse" role="tabpanel">')
-					
-					.appendLine('		<div class="container">')
-					.appendLine('			<table class="table table-hover table-sm">') //table-striped
-					.appendLine('			<thead>') //class="thead-light"
-					.appendLine('				<tr>')
-					.appendLine('					<th scope="col"><p class="text-center font-weight-ligh">Numeración</p></th>')
-					.appendLine('					<th scope="col"><p class="text-center font-weight-ligh">Viñeta</p></th>')
-					//.appendLine('					<th scope="col"><p class="text-center font-weight-ligh">Resolución</p></th>')
-					.appendLine('				</tr>')
-					.appendLine('			</thead>')
-					.appendLine('			<tbody>');
-				
-				l_tema_ult = l_tema;
-			}
-			
-			l_problema = '';
-			if (a_data[i].id_problema) 
-			{
-				l_problema = pad(a_data[i].numeracion_prob, 8, ' ');
-				l_problema = l_problema.replace(/ /g, '&nbsp;');
-				if (a_data[i].prob_respuesta > 0)
-				{
-					l_problema = '<a href="/problema/' + a_data[i].id_problema +'"> ' + l_problema + ' </a>&nbsp;&nbsp;<i class="fa fa-check-square-o color-green" aria-hidden="true"></i>';
-				}
-				else
-				{
-					l_problema = '<a href="/problema/' + a_data[i].id_problema +'"> ' + l_problema+ ' </a>&nbsp;&nbsp;<i class="fa fa-window-close-o color-grey" aria-hidden="true"></i>';
-				}
-			}
-			else
-			{l_problema = '<i class="fa fa-window-close-o color-grey" aria-hidden="true"></i> NO Definido';}
-			
-			l_problema_div = '';
-			(a_data[i].num_partes > 1)? l_problema_div = ' &nbsp;&nbsp;<span class="fa fa-list-ul color-grey"></span>': l_problema_div = '';
-			
 			l_block
-				.appendLine('				<tr>')
-				.appendLine('					<td>' + l_problema + l_problema_div + '</td>')
-				.appendLine('					<td>' + a_data[i].vineta + '</td>')
-				.appendLine('				</tr>');
-		}
-	}
-	
-	l_block
-		.appendLine('			</tbody>')
-		.appendLine('			</table>')
-		.appendLine('		</div>')	//class="container"
-		// Cerramos el ultimo tema
-		.appendLine('		</div>')	// id="TemaAccordion' + a_data[i].id + '"
-		.appendLine('	</div>')		// class="item"
-		// Cerramos el ultimo tema
-		.appendLine('</div>');	// id="TemasAccordion"
+		.appendLine('<div class="content">')
 		
-	exports.GetHTML(l_block, a_resp);
+		.appendLine('<div class="mb-3" style="max-width: 95%;"> ')
+		.appendLine('  <div class="row ">')
+		.appendLine('    <div class="col-md-4">')
+		.appendLine('      <img src="/img/' + a_data[i].url_imagen + '" alt="amigos tercera edad" class="card-img">')
+		.appendLine('    </div>')
+		.appendLine('    <div class="col-md-8">')
+
+		.appendLine('	<div class="row">')
+		.appendLine('		<h1>'+ a_data[i].titulo +'</h1>')
+		.appendLine('	</div>')
+		.appendLine('	<div class="row">')
+		.appendLine('		<h3>'+ a_data[i].subtitulo +'</h3>')
+		.appendLine('	</div>')
+		.appendLine('	<div class="row">')
+		.appendLine('				<span class="boletin-autor">'+ a_data[i].autor +' | &nbsp;</span>')
+		.appendLine('				<span class="boletin-post-date"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;'+ a_data[i].publicado +'&nbsp;</span>')
+		.appendLine('				<span class="boletin-tags"> | &nbsp;<i class="fa fa-tags" aria-hidden="true"></i> '+ a_data[i].tags +'</span>')
+		.appendLine('	</div>')
+		.appendLine('	<div class="row">')
+		.appendLine('	<p>')
+		.appendLine('		'+ a_data[i].introduccion +'')
+		.appendLine('	</p>')
+		.appendLine('	</div>')
+		.appendLine('	<div class="text-right">')
+		.appendLine('		<hr class="boletin-hr">')
+		.appendLine('		<a class="btn btn-outline-secondary" tabindex="-1" role="button" aria-disabled="true" target="_blank" href="boletin/'+ a_data[i].id +'"><i class="fa fa-book"></i> leer Mas...</a>')
+		.appendLine('	</div>')
+		
+		.appendLine('    </div>')	// col-md-8
+		.appendLine('  </div>')		// class="row 
+		.appendLine('</div>')		// class="mb-3" style="max-width: 95%;"
+		.appendLine('</div>')		// div class="content"
+		}
+
+		l_block
+		.appendLine('<div class="content">')
+		.appendLine('	<hr class="boletin-hr">')
+		.appendLine('	<h3>')
+		.appendLine('	<a class="btn btn-outline-secondary disabled" tabindex="-1" role="button" aria-disabled="true" target="_blank" href="boletin/siguiente"><i class="fa fa-angle-left fa-2x"></i> Anterior</a>')
+		.appendLine('	<a class="btn btn-outline-secondary disabled" tabindex="-1" role="button" aria-disabled="true" target="_blank" href="boletin/anterior">Siguiente <i class="fa fa-angle-right fa-2x"></i></a>')
+		.appendLine('	<hr class="boletin-hr">')
+		.appendLine('	</h3>')
+		.appendLine('	<h3>')
+		//.appendLine('	<i class="fa fa-share-alt" aria-hidden="true"></i> ')
+		.appendLine('	<a class="btn btn-outline-secondary" tabindex="-1" role="button" aria-disabled="true" target="_blank" href="https://www.facebook.com/Alzheimer-El-Salvador-256581527700226/"><i class="fa fa-facebook fa-2x"></i></a>')
+		.appendLine('	<a class="btn btn-outline-secondary" tabindex="-1" role="button" aria-disabled="true" target="_blank" href="https://www.youtube.com/channel/UC-9qz9aOLouMEmYMmS2Vw_g"><i class="fa fa-youtube fa-2x"></i></a>')
+		.appendLine('	</h3>')
+	
+		.appendLine('	')
+		.appendLine('	<button id="button_scrolltop" type="button" class="btn btn-outline-secondary button-scrolltop" onclick="FuncScrollTop()" title="Arriba" ><i class="fa fa-arrow-up" aria-hidden="true"></i></button>')
+		.appendLine('</div>')
+		.appendLine('    <script>')
+		.appendLine('    <!-- // When the user scrolls down 20px from the top of the document, show the button -->')
+		.appendLine('    window.onscroll = function() {FuncScroll()};')
+		.appendLine('    ')
+		.appendLine('    function FuncScroll() ')
+		.appendLine('    {')
+		.appendLine('        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {')
+		.appendLine('            document.getElementById("button_scrolltop").style.display = "block";')
+		.appendLine('        } else {')
+		.appendLine('            document.getElementById("button_scrolltop").style.display = "none";')
+		.appendLine('        }')
+		.appendLine('    }')
+		.appendLine('    ')
+		.appendLine('    // When the user clicks on the button, scroll to the top of the document')
+		.appendLine('    function FuncScrollTop() ')
+		.appendLine('    {')
+		.appendLine('        document.body.scrollTop = 0; // For Safari')
+		.appendLine('        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera')
+		.appendLine('    }')
+		.appendLine('    </script>')
+	}
+
+	exports.GetHTMLStandar(l_block, a_resp, 200, "", [0,1,2,3,4,5,7,8,9,11,30,32]); //[0,1,2,3,4,5,7,8,9,10,12,13,14,15];
+}	//showBoletinList
+
+
+exports.showPublicacion = function(a_req, a_resp, a_data)
+{
+    if (settings.servConfig.debug){console.log("Procesando HttpMsgs showPublicacion");}
+
+	//var sb = new StringBuilder({newline: "\r\n"});
+	var l_block = new StringBuilder({ newline: '\r\n\t' }); // add a tab at the end
+	var enable_botton_ult = '';
+	var enable_botton_pri = '';
+	var tema_anterior = "0";
+	var tema_siguiente = "0";
+	
+	
+	var l_sb_NavBar = new StringBuilder({ newline: '\r\n\t' }) // add a tab at the end 
+	exports.showNabBar(l_sb_NavBar);
+	
+	var l_sb_Adds = new StringBuilder({ newline: '\r\n\t' }) // add a tab at the end
+	exports.showAdds(l_sb_Adds, "D");
+	if (settings.servConfig.debug){console.log(a_data);}
+	if (a_data)
+	{
+		tema_anterior = a_data[0].id - 1;
+		tema_siguiente = a_data[0].id + 1;
+		
+		if (a_data[0].ult_id == a_data[0].id)
+		{
+			enable_botton_ult = "disabled";
+			enable_botton_pri = "";
+		}
+		
+		if (a_data[0].id == "1")
+		{
+			enable_botton_ult = "";
+			enable_botton_pri = "disabled";
+		}
+			
+		l_block
+			// SideBar
+			.appendLine('<div  >') // class="bg-dark"
+			.append(l_sb_NavBar)
+			.appendLine('</div>')
+			.appendLine('  <br>')
+			
+		.appendLine('<div class="container">')
+		.appendLine('	<div class="row">')
+		.appendLine('		<div class="col-8" >')
+		.appendLine('			<div>')
+		.appendLine('				<span class="boletin-post-date">'+ a_data[0].publicado+'</span>')
+		.appendLine('			</div>')
+		.appendLine('		</div>')
+		.appendLine('		<!-- <div class="col "> -->')
+		.appendLine('		<!-- One of three columns -->')
+		.appendLine('		<!-- </div> -->')
+		.appendLine('		<div class="col-4">')
+		.appendLine('			<div style="text-align: right;">')
+		.appendLine('				<span class="boletin-autor">'+ a_data[0].autor +'</span>')
+		.appendLine('				<img class="boletin-avatar" src="/img/default-avatar.png" alt="avatar">')
+		.appendLine('			</div>')
+		.appendLine('		</div>')
+		.appendLine('	</div>')
+		.appendLine('</div>')
+		.appendLine('')
+		.appendLine('<div class="content">')
+		.appendLine('	<div>')
+		.appendLine('		<h1>'+ a_data[0].titulo +'</h1>')
+		.appendLine('		<h3>'+ a_data[0].subtitulo +'</h3>')
+		.appendLine('	</div>')
+		.appendLine('	<img src="/img/'+ a_data[0].url_imagen +'" alt="'+ a_data[0].titulo +'" class="boletin-image">')
+		.appendLine('	<p>')
+		.appendLine('		'+ a_data[0].introduccion )
+		.appendLine('	</p>')
+		.appendLine('	<hr class="boletin-hr">')
+		.appendLine('	')
+		.appendLine('	<p>')
+		.appendLine('		' + a_data[0].contenido)
+		.appendLine('	</p>')
+		.appendLine('	<br><br>')
+		.appendLine('	<hr class="boletin-hr">')
+		.appendLine('	<h3>')
+		.appendLine('	<a class="btn btn-outline-secondary ' + enable_botton_pri + '" tabindex="-1" role="button" aria-disabled="true" target="_self" href="/boletin/' + tema_anterior + '"><i class="fa fa-angle-left fa-2x"></i> Anterior</a>')
+		.appendLine('	<a class="btn btn-outline-secondary ' + enable_botton_ult + '" tabindex="-1" role="button" aria-disabled="true" target="_self" href="/boletin/' + tema_siguiente + '">Siguiente <i class="fa fa-angle-right fa-2x"></i></a>')
+		.appendLine('	</h3>')
+		.appendLine('	<hr class="boletin-hr">')
+		.appendLine('	<h3>')
+		//.appendLine('	<i class="fa fa-share-alt" aria-hidden="true"></i> ')
+		.appendLine('	<a class="btn btn-outline-secondary" tabindex="-1" role="button" aria-disabled="true" target="_blank" href="https://www.facebook.com/Alzheimer-El-Salvador-256581527700226/"><i class="fa fa-facebook fa-2x"></i></a>')
+		.appendLine('	<a class="btn btn-outline-secondary" tabindex="-1" role="button" aria-disabled="true" target="_blank" href="https://www.youtube.com/channel/UC-9qz9aOLouMEmYMmS2Vw_g"><i class="fa fa-youtube fa-2x"></i></a>')
+		.appendLine('	</h3>')
+	
+		.appendLine('	')
+		.appendLine('	<button id="button_scrolltop" type="button" class="btn btn-outline-secondary button-scrolltop" onclick="FuncScrollTop()" title="Arriba" ><i class="fa fa-arrow-up" aria-hidden="true"></i></button>')
+		.appendLine('</div>')
+		.appendLine('    <script>')
+		.appendLine('    <!-- // When the user scrolls down 20px from the top of the document, show the button -->')
+		.appendLine('    window.onscroll = function() {FuncScroll()};')
+		.appendLine('    ')
+		.appendLine('    function FuncScroll() ')
+		.appendLine('    {')
+		.appendLine('        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {')
+		.appendLine('            document.getElementById("button_scrolltop").style.display = "block";')
+		.appendLine('        } else {')
+		.appendLine('            document.getElementById("button_scrolltop").style.display = "none";')
+		.appendLine('        }')
+		.appendLine('    }')
+		.appendLine('    ')
+		.appendLine('    // When the user clicks on the button, scroll to the top of the document')
+		.appendLine('    function FuncScrollTop() ')
+		.appendLine('    {')
+		.appendLine('        document.body.scrollTop = 0; // For Safari')
+		.appendLine('        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera')
+		.appendLine('    }')
+		.appendLine('    </script>')
+	}
+
+	exports.GetHTMLStandar(l_block, a_resp, 200, "", [0,1,2,3,4,5,7,8,9,11,30,32]); //[0,1,2,3,4,5,7,8,9,10,12,13,14,15];
 }	//showPublicacion
 
 exports.GooSearch = function(a_sb_search)
@@ -959,7 +897,7 @@ exports.GooSearch = function(a_sb_search)
 		.appendLine("<gcse:search></gcse:search>");
 }
 
-exports.GetHTMLStandar = function(a_sb_body, a_resp, a_code, a_msg)
+exports.GetHTMLStandar = function(a_sb_body, a_resp, a_code, a_msg, a_head_include)
 {
 	if (settings.servConfig.debug){console.log("Procesando HttpMsgs GetHTMLStandar");}
 	
@@ -977,7 +915,7 @@ exports.GetHTMLStandar = function(a_sb_body, a_resp, a_code, a_msg)
 	endTag = '</{0}>';
 	attr = '{0}="{1}"';
 
-	exports.showHead(head);
+	exports.showHead(head, a_head_include);
 	//exports.showNabBar(l_sb_NavBar);
 	//exports.showAdds(l_sb_Adds, "A");
 	//exports.showFooter(l_sb_Footer);
@@ -987,32 +925,19 @@ exports.GetHTMLStandar = function(a_sb_body, a_resp, a_code, a_msg)
 	html
 		.appendLine('<!DOCTYPE html>')
 		.appendLine('<html {0}>', attr.format('lang', 'en'))
+		
 		// <head>
 		.appendLine(initTag.format('head'))
 		.append(head)
 		.appendLine(endTag.format('head'))
 		// </head>
+		
 		// <body>
 		.appendLine(initTag.format('body'))
-		//.append(l_sb_NavBar)
-		
-			// <ADS A>
-		//.append(l_sb_Adds)
-			// </ADS A>
-		
-			// <Body Area>
 		.append(a_sb_body)
-
-			// </Body Area>
-		
-		// Categorias
-		//.append(l_sb_Footer)
-		
-		// Analytics
-		//.append(l_sb_Analytics)
-		
 		.appendLine(endTag.format('body'))					
 		// </body>
+		
 		.append(endTag.format('html'));						// end HTML
  
 	html.build(function(err, result)
@@ -1027,7 +952,7 @@ exports.GetHTMLStandar = function(a_sb_body, a_resp, a_code, a_msg)
 // Respuestas y Accesos NO PERMITIDOS
 exports.show500 = function(req, resp, err)
 {
-    console.log("Procesando HttpMsgs 500: " + err);
+    console.log("Procesando HttpMsgs show500: " + err);
 	console.log("Peticion a Procesar>> " + req.method.toUpperCase() + " : " + req.url + "<<");
 	console.log(BlackList.ipTest(req));
 	console.log(req.headers);
@@ -1038,13 +963,13 @@ exports.show500 = function(req, resp, err)
 		
 		//	<!--=== Error V5 ===-->
 		.appendLine('<div class="container valign__middle">')
-		.appendLine('	<a class="logo-a" href="/"><img alt="Resolución.Club" src="/img/name512x120.png"></a>')
+		.appendLine('	<a class="logo-a" href="/"><img alt="Alzheimer El Salvador" src="/img/logo_asociacion.png"></a>')
 		.appendLine('	<h1>500: Internal Error</h1>')			
 		.appendLine('	<div class="error-v5">')
-		.appendLine('	<p>Sabes ¿por que? se suicido el Libro de Matematicas<br>R/Es que tenia muchos problemas<br><br>...y nos parace que no sera el unico...</p>')
+		.appendLine('	<p>Al parecer la peticion que realizas No es valida<br>Es posible que la URL este mal escrita, o necesitas iniciar sesion para poder acceder a ese recurso<br><br>puedes volver a intentar mas tarde</p>')
 		.appendLine('				<a class="nav-item nav-link" href="/"><span class="fa fa-home"></span> Volver a Home</a>')
-		.appendLine('				<a class="nav-item nav-link" href="/categoria"><span class="fa fa-book"></span> Busca en las Categorias</a>')
-		.appendLine('				<a class="nav-item nav-link" href="http://facebook.com/Resolucion.club" target="_blank"><span class="fa fa-facebook-square"></span> Visita nuestro grupo en Facebook</a>')
+		.appendLine('				<a class="nav-item nav-link" href="/boletin"><span class="fa fa-book"></span> Puedes revisar nuestro boletin</a>')
+		.appendLine('				<a class="nav-item nav-link" href="https://www.facebook.com/Alzheimer-El-Salvador-256581527700226/" target="_blank"><span class="fa fa-facebook-square"></span> Visita nuestro grupo en Facebook</a>')
 		.appendLine('	</div>')
 		.appendLine('</div><!--/container-->');
 	
@@ -1240,4 +1165,1732 @@ exports.showMenu = function(req, resp, data)
 }
 
 
+exports.MttoListDetail = function(a_req, a_resp, a_data, a_metadata)
+{
+	if (settings.servConfig.debug){console.log("Procesando HttpMsgs MttoListDetail");}
+
+	var l_block = new StringBuilder({ newline: '\r\n\t' });
+	var l_block_modal = new StringBuilder({ newline: '\r\n\t' });
+	var l_string = "";
+	var l_ban = false;
+
+	if (a_data)
+	{
+		if (settings.servConfig.debug){console.log(a_data);}	// log
+
+		l_block
+			.append('\t')
+			.appendLine('<br><h1>' + a_metadata.title + '</h1><hr>')
+			.appendLine('<table id="example"  class="display" style="width:100%"></table>')
+			.appendLine('<script>')
+			.appendLine('var dataSet = [')	// Begin
+			for (var i=0; i< a_data.length; i++)
+			{
+				l_string = "[";
+				for (var j=0; j< a_metadata.columns.length; j++)
+				{
+					//if (a_metadata.columns[j].visible)
+					//{
+						if (l_string.length > 1) { l_string += ',';}
+						l_string += '"' + a_data[i][a_metadata.columns[j].col] + '"';
+					//}
+				}
+				l_string  += ']';
+				if (i+1 < a_data.length) {l_string  += ',';}
+
+				l_block.appendLine(l_string)
+				// Ejemplo de estructura base '[ "Tiger Nixon", "System Architect", "Edinburgh", "5421", "2011/04/25", "$320,800" ],'
+			}
+
+		l_block
+			.appendLine('];')				// End
+			.appendLine('')		// *** Configuracion de los dataTables ***
+			.appendLine('$(document).ready(function() {')
+			.appendLine('   var table = $( \'#example\').DataTable( {')
+			.appendLine('	')
+			.appendLine('		// Configuracion Inicial')
+			.appendLine('        "paging":   true,')
+			.appendLine('        "ordering": true,')
+			.appendLine('        "info":     true,')
+			.appendLine('        "select":   "' + settings.pagConfig.pagingSelect + '",')
+			.appendLine('		"pagingType": "' + settings.pagConfig.pagingType + '",')
+			.appendLine('		"lengthMenu": ' +  settings.pagConfig.pagingLength + ',')
+			.appendLine('		')
+			.appendLine('	// Configuracion de los Objetos')
+			.appendLine('	 "dom": "' + settings.pagConfig.pagingDOM + '",')
+			.appendLine('	 buttons: [' + settings.pagConfig.buttons_default + '],')
+			.appendLine('		')
+			.appendLine('		// Idioma por defecto')
+			.appendLine('		"language": {')
+			.appendLine('            "lengthMenu":		"Mostrando _MENU_ registros por pagina",')
+			.appendLine('            "zeroRecords":		"No se encontraron registros - revisar",')
+			.appendLine('            "info":			"Pagina _PAGE_ de _PAGES_ / _MAX_ total de registros",')
+			.appendLine('            "infoEmpty":		"Registros No Disponibles",')
+			.appendLine('            "infoFiltered":	"(_TOTAL_ filtrados)",')
+			.appendLine('			// Adicionados')
+			.appendLine('			"emptyTable":		"No hay datos en la tabla",')
+			.appendLine('			"infoPostFix":		"",		// NO disponibles')
+			.appendLine('			"infoThousands":	".",	// NO disponibles')
+			.appendLine('			"decimal": 			".",	// NO disponibles')
+			.appendLine('           "thousands": 		",",	// NO disponibles')
+			.appendLine('			"loadingRecords": 	"Cargando Registros...",')
+			.appendLine('			"processing":   	"Procesando Registros...",')
+			.appendLine('			"search":			"Buscar",')
+			.appendLine('			"paginate": {')
+			.appendLine('				"first":    	"Primero",')
+			.appendLine('				"previous": 	"<",')
+			.appendLine('				"next":     	">",')
+			.appendLine('				"last":     	"Ultimo"')
+			.appendLine('			},')
+			.appendLine('			"oAria": {')
+			.appendLine('				"sSortAscending":  ": habilitar para ordenar la columna en orden ascendente",')
+			.appendLine('				"sSortDescending": ": habilitar para ordenar la columna en orden descendente"')
+			.appendLine('			},')
+			.appendLine('			select: {')
+			.appendLine('			    rows: {')
+			.appendLine('			        _: "%d filas seleccionadas",')
+			.appendLine('			        0: "(Click en una fila para seleccionar)",')
+			.appendLine('			        1: "(Fila seleccionada)"')
+			.appendLine('			    }')
+			.appendLine('			}')
+			.appendLine('        },')
+			.appendLine('		')
+			.appendLine('		// Ordenado por defecto')
+			.appendLine('		"order": [[ 1, "asc" ]],')
+			.appendLine('		')
+			.appendLine('		// Listado de Columnas Visible y Habilitadas')
+			.appendLine('		"columnDefs": [')	// Begin
+			for (var l=0; l< a_metadata.columns.length; l++)
+			{
+				// Ejemplo: {"targets": [ 0 ], "visible": false, "searchable": false}
+				var l_string3 = '{"targets": [ ' + l + ' ], "visible": ' + a_metadata.columns[l].visible + ', "searchable": ' + a_metadata.columns[l].searchable +'} ';
+				if (l + 1 <  a_metadata.columns.length) {l_string3 += ',';}
+				l_block.appendLine(l_string3);
+			}
+
+		l_block
+			.appendLine('        ],')				// End
+			.appendLine('		')
+			.appendLine('		// Listado de Columnas')
+			.appendLine('        data: dataSet,')
+			
+			// Listado de Columnas, Visibles en el Grid
+			.appendLine('        columns: [')
+				for (var k=0; k< a_metadata.columns.length; k++)
+				{
+					//if (a_metadata.columns[k].visible)
+					//{
+						var l_string2 = ' { title: "' + a_metadata.columns[k].label + '" }';
+						if (k + 1 <  a_metadata.columns.length) {l_string2 += ',';}
+						l_block.appendLine(l_string2)
+					//}
+				}
+		l_block
+			.appendLine('        ]')
+			.appendLine('    } );')
+
+		var l_toolbarPlus = '';
+		if (a_metadata.hasOwnProperty('toolbar'))
+		{
+			l_toolbarPlus = '&nbsp;&nbsp; ';
+			for (var xy=0; xy < a_metadata.toolbar.length; xy++)
+			{
+				l_toolbarPlus += '<button id="' + a_metadata.toolbar[xy].button + '" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="' + a_metadata.toolbar[xy].title + '" ><span class="' + a_metadata.toolbar[xy].icon + '" /></button>';
+				//{button: "ButtonReset", title: "Resetear Password", icon: "fa fa-file-powerpoint-o", URL: "api_resetpass"}]
+			}
+		}
+
+		var l_toolbar = '$("div.toolbar").html(\'' +
+				'<button type="button" onclick="location.href=&#39;/sys/panel&#39;" data-toggle="tooltip" data-placement="top" title="Panel de opciones" class="btn btn-secondary"><span class="fa fa-home" /></button> ' +
+				'&nbsp;&nbsp; ' +
+				'<button id="ButtonAdd" onclick="location.href=&#39;/sys/' + a_metadata.name + '_new&#39;" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Adicionar Registro" ><span class="fa fa-file-text-o" /></button>' + 
+				'<button id="ButtonEdit" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Editar Registro" ><span class="fa fa-pencil-square-o" /></button>' +
+				'<button id="ButtonDel" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Borrar Registro"><span class="fa fa-times" /></button>' +
+				l_toolbarPlus +
+				'\');';
+				
+		l_block
+		//.appendLine('$("div.toolbar").html(\'<button type="button" onclick="location.href=&#39;/sys/menu&#39;" data-toggle="tooltip" data-placement="top" title="Menu de opciones" class="btn btn-secondary"><span class="fa fa-home" /></button> &nbsp;&nbsp; <button id="ButtonAdd" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Adicionar Registro" onclick="location.href=&#39;/sys/pais_new&#39;" ><span class="fa fa-file-text-o" /></button><button id="ButtonEdit" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Editar Registro" ><span class="fa fa-pencil-square-o" /></button><button id="ButtonDel" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Borrar Registro"><span class="fa fa-times" /></button>\');')
+		.appendLine(l_toolbar)
+		.appendLine('                   ')
+		
+		// Select ROW
+		.appendLine('    $(\'#example tbody\').on( \'click\', \'tr\', function () {')
+		.appendLine('        if ( $(this).hasClass(\'selected\') ) {')
+		.appendLine('            $(this).removeClass(\'selected\');')
+		.appendLine('        }')
+		.appendLine('        else {')
+		.appendLine('            table.$(\'tr.selected\').removeClass(\'selected\');')
+		.appendLine('            $(this).addClass(\'selected\');')
+		.appendLine('        }')
+		.appendLine('    } );')
+		.appendLine(' ')
+		// Select ROW
+
+		// Edit button
+		.appendLine('	$("#ButtonEdit").click( function () {')
+		.appendLine('		try {')
+		.appendLine('  			var l_Item = ' + GetPrimaryKey(a_metadata).join(" + '-' + ") + ';')   //table.row(".selected").data()[0];
+		.appendLine('  			var l_RecursoURL = "/sys/' + a_metadata.name + '_edit/"+l_Item; ')
+		.appendLine('			location.href = l_RecursoURL; ')
+		.appendLine('		}')
+		.appendLine('		catch(err) {')
+		.appendLine('			swal({title: "Click en una fila para seleccionar", text: "Operacion Cancelada", icon:"error", buttons: false, timer:3000});')
+		.appendLine('		}')
+		.appendLine('	} );')
+		.appendLine(' ')
+		// Edit button
+
+		// Del button
+		.appendLine('	$("#ButtonDel").click( function () {')
+		//.appendLine(' 		 console.log( table.row(".selected").data()[0] ); console.log(table.row(".selected").data());')
+		.appendLine('		try {')
+		.appendLine('			var l_RecursoURL = "/api/' + a_metadata.name + '";  ')
+		.appendLine('			var l_Item = ' + GetPrimaryKey(a_metadata).join(" + '-' + ") + '; ')
+		.appendLine('		}')
+		.appendLine('		catch(err) {')
+		.appendLine('			swal({title: "Click en una fila para seleccionar", text: "Operacion Cancelada", icon:"error", buttons: false, timer:3000});')
+		.appendLine('			return;')
+		.appendLine('		}')
+		.appendLine('	swal')
+		.appendLine('	({')
+		.appendLine('	  title: "¿Desea Eliminar el Registro?",')
+		.appendLine('	  text: "Una vez Eliminado, No podra ser Recuperado",')
+		.appendLine('	  icon: "warning",')
+		.appendLine('	  buttons: true,')
+		.appendLine('	  dangerMode: true,')
+		.appendLine('	})')
+		.appendLine('	.then((willDelete) => {')
+		.appendLine('	  if (willDelete) ')
+		.appendLine('	  {')
+		.appendLine(' ')
+		.appendLine('		// Call Web API to get a list of Product')
+		.appendLine('		$.ajax({')
+		.appendLine('			url: l_RecursoURL+"/"+l_Item,')
+		.appendLine('			type: "DELETE",')
+		.appendLine('		success: function (respuesta)')
+		.appendLine('		{')
+		.appendLine('        	table.row(".selected").remove().draw( false );')
+		.appendLine('		  	swal(')
+		.appendLine('		  	{')
+		.appendLine('		  	title: "Registro Eliminado", ')
+		.appendLine('		  	text: "Id de registro "+l_Item, ')
+		.appendLine('		  	icon: "success", ')
+		.appendLine('			buttons: false,')
+		.appendLine('			timer: 3000 ')
+		.appendLine('			});},')
+		.appendLine('		error: function (request, message, error)')
+		.appendLine('		{ handleException(request, message, error);}')
+		.appendLine('		   ')
+		.appendLine('		 }); ')
+		.appendLine(' ')
+		.appendLine('	  } else ')
+		.appendLine('	  {')
+		.appendLine('		swal({title: "Operacion Cancelada", text: "Id de registro "+l_Item, icon:"error", buttons: false, timer:3000});')
+		.appendLine('	  }')
+		.appendLine('	});')
+		.appendLine('					')
+		.appendLine('    } );')
+		// Del button
+		
+		// Custom button
+		if (a_metadata.hasOwnProperty('toolbar'))
+		{
+			for (var yx=0; yx < a_metadata.toolbar.length; yx++)
+			{
+				//a_metadata.toolbar[xy].button 
+				//' + a_metadata.toolbar[xy].title + '
+				//' + a_metadata.toolbar[xy].icon + '
+		
+				l_block
+				.appendLine('	$("#' + a_metadata.toolbar[yx].button + '").click( function () {')
+				.appendLine('		try {')
+				.appendLine('			var l_RecursoURL = "' + a_metadata.toolbar[yx].URL + '";  ')
+				.appendLine('			var l_Item = ' + GetPrimaryKey(a_metadata).join(" + '-' + ") + '; ')
+				.appendLine('		}')
+				.appendLine('		catch(err) {')
+				.appendLine('			swal({title: "Click en una fila para seleccionar", text: "Operacion Cancelada", icon:"error", buttons: false, timer:3000});')
+				.appendLine('			return;')
+				.appendLine('		}')
+				.appendLine('	swal')
+				.appendLine('	({')
+				.appendLine('	  title: "¿Desea ' + a_metadata.toolbar[yx].title + ' al Registro?",')
+				.appendLine('	  text: "Una vez ' + a_metadata.toolbar[yx].title + ', No podra ser Recuperado",')
+				.appendLine('	  icon: "warning",')
+				.appendLine('	  buttons: true,')
+				.appendLine('	  dangerMode: true,')
+				.appendLine('	})')
+				.appendLine('	.then((willDelete) => {')
+				.appendLine('	  if (willDelete) ')
+				.appendLine('	  {')
+				.appendLine(' ')
+				.appendLine('		// Call Web API to get a list of Product')
+				.appendLine('		$.ajax({')
+				.appendLine('			url: l_RecursoURL+"/"+l_Item,')
+				.appendLine('			type: "' + a_metadata.toolbar[yx].verbo + '",')
+				.appendLine('		success: function (respuesta)')
+				.appendLine('		{')
+				//.appendLine('        	table.row(".selected").remove().draw( false );')
+				.appendLine('		  	swal(')
+				.appendLine('		  	{')
+				.appendLine('		  	title: "Al Registro se le realizo ' + a_metadata.toolbar[yx].title + '", ')
+				.appendLine('		  	text: "Id de registro "+l_Item, ')
+				.appendLine('		  	icon: "success", ')
+				.appendLine('			buttons: false,')
+				.appendLine('			timer: 3000 ')
+				.appendLine('			});},')
+				.appendLine('		error: function (request, message, error)')
+				.appendLine('		{ handleException(request, message, error);}')
+				.appendLine('		   ')
+				.appendLine('		 }); ')
+				.appendLine(' ')
+				.appendLine('	  } else ')
+				.appendLine('	  {')
+				.appendLine('		swal({title: "Operacion Cancelada", text: "Id de registro "+l_Item, icon:"error", buttons: false, timer:3000});')
+				.appendLine('	  }')
+				.appendLine('	});')
+				.appendLine('					')
+				.appendLine('    } );')
+				.appendLine('// fin Custom Button ')
+		
+			}
+		}
+		// Custom button
+		
+		// Habilitar el Tooltips en los botones
+		l_block
+		.appendLine('$(function () {')
+		.appendLine('  $(\'[data-toggle="tooltip"]\').tooltip()')
+		.appendLine('});')
+		.appendLine('} );')
+		.appendLine('')
+		.appendLine('</script>')
+		.appendLine('');
+	} // if (a_data)
+		
+	exports.GetHTMLsys(l_block, a_resp);
+};
+
+
+exports.MttoList = function(a_req, a_resp, a_data, a_metadata)
+{
+	if (settings.servConfig.debug){console.log("Procesando HttpMsgs MttoList");}
+
+	var l_block = new StringBuilder({ newline: '\r\n\t' });
+	var l_block_modal = new StringBuilder({ newline: '\r\n\t' });
+	var l_string = "";
+	var l_ban = false;
+
+	if (a_data)
+	{
+		//exports.Mtto_X(a_data, a_metadata, l_block_modal);
+		console.log(a_data);
+		l_block.append('\t')
+			.appendLine('<br><h1>' + a_metadata.title + '</h1><hr>')
+			//.appendLine('<button id="ButtonDel" type="button" class="btn btn-secondary" ><span class="fa fa-ban" /></button>')
+			.appendLine('<table id="example"  class="display" style="width:100%"></table>')
+			
+			.appendLine('<script>')
+			.appendLine('var dataSet = [')
+			for (var i=0; i< a_data.length; i++)
+			{
+				l_string = "[";
+
+				for (var j=0; j< a_metadata.columns.length; j++)
+				{
+					//if (a_metadata.columns[j].visible)
+					//{
+						if (l_string.length > 1) { l_string += ',';}
+						l_string += '"' + a_data[i][a_metadata.columns[j].col] + '"';
+					//}
+				}
+				
+				l_string  += ']';
+				if (i+1 < a_data.length) {l_string  += ',';}
+
+				l_block.appendLine(l_string)
+				// Ejemplo de estructura base '[ "Tiger Nixon", "System Architect", "Edinburgh", "5421", "2011/04/25", "$320,800" ],'
+			}
+
+			l_block
+			.appendLine('];')
+			.appendLine('')
+			.appendLine('$(document).ready(function() {')
+			.appendLine('   var table = $( \'#example\').DataTable( {')
+			.appendLine('	')
+			.appendLine('		// Configuracion Inicial')
+			.appendLine('        "paging":   true,')
+			.appendLine('        "ordering": true,')
+			.appendLine('        "info":     true,')
+			.appendLine('        "select":   "' + settings.pagConfig.pagingSelect + '",')
+			.appendLine('		"pagingType": "' + settings.pagConfig.pagingType + '",')
+			.appendLine('		"lengthMenu": ' +  settings.pagConfig.pagingLength + ',')
+			.appendLine('		')
+			.appendLine('	// Configuracion de los Objetos')
+			.appendLine('	 "dom": "' + settings.pagConfig.pagingDOM + '",')
+			.appendLine('	 buttons: [' + settings.pagConfig.buttons_default + '],')
+			.appendLine('		')
+			.appendLine('		// Idioma por defecto')
+			.appendLine('		"language": {')
+			.appendLine('            "lengthMenu":		"Mostrando _MENU_ registros por pagina",')
+			.appendLine('            "zeroRecords":		"No se encontraron registros - revisar",')
+			.appendLine('            "info":			"Pagina _PAGE_ de _PAGES_ / _MAX_ total de registros",')
+			.appendLine('            "infoEmpty":		"Registros No Disponibles",')
+			.appendLine('            "infoFiltered":	"(_TOTAL_ filtrados)",')
+			.appendLine('			// Adicionados')
+			.appendLine('			"emptyTable":		"No hay datos en la tabla",')
+			.appendLine('			"infoPostFix":		"",		// NO disponibles')
+			.appendLine('			"infoThousands":	".",	// NO disponibles')
+			.appendLine('			"decimal": 			".",	// NO disponibles')
+			.appendLine('           "thousands": 		",",	// NO disponibles')
+			.appendLine('			"loadingRecords": 	"Cargando Registros...",')
+			.appendLine('			"processing":   	"Procesando Registros...",')
+			.appendLine('			"search":			"Buscar",')
+			.appendLine('			"paginate": {')
+			.appendLine('				"first":    	"Primero",')
+			.appendLine('				"previous": 	"<",')
+			.appendLine('				"next":     	">",')
+			.appendLine('				"last":     	"Ultimo"')
+			.appendLine('			},')
+			.appendLine('			"oAria": {')
+			.appendLine('				"sSortAscending":  ": habilitar para ordenar la columna en orden ascendente",')
+			.appendLine('				"sSortDescending": ": habilitar para ordenar la columna en orden descendente"')
+			.appendLine('			},')
+			.appendLine('			select: {')
+			.appendLine('			    rows: {')
+			.appendLine('			        _: "%d filas seleccionadas",')
+			.appendLine('			        0: "(Click en una fila para seleccionar)",')
+			.appendLine('			        1: "(Fila seleccionada)"')
+			.appendLine('			    }')
+			.appendLine('			}')
+			.appendLine('        },')
+			.appendLine('		')
+			.appendLine('		// Ordenado por defecto')
+			.appendLine('		"order": [[ 1, "asc" ]],')
+			.appendLine('		')
+			.appendLine('		// Listado de Columnas Visible y Habilitadas')
+			.appendLine('		"columnDefs": [')
+				for (var l=0; l< a_metadata.columns.length; l++)
+				{
+					// Ejemplo: {"targets": [ 0 ], "visible": false, "searchable": false}
+					var l_string3 = '{"targets": [ ' + l + ' ], "visible": ' + a_metadata.columns[l].visible + ', "searchable": ' + a_metadata.columns[l].searchable +'} ';
+					if (l + 1 <  a_metadata.columns.length) {l_string3 += ',';}
+					l_block.appendLine(l_string3)
+				}
+
+			l_block
+			.appendLine('        ],')
+			
+			.appendLine('		')
+			.appendLine('		// Listado de Columnas')
+			.appendLine('        data: dataSet,')
+			
+			// Listado de Columnas, Visibles en el Grid
+			.appendLine('        columns: [')
+				for (var k=0; k< a_metadata.columns.length; k++)
+				{
+					//if (a_metadata.columns[k].visible)
+					//{
+						var l_string2 = ' { title: "' + a_metadata.columns[k].label + '" }';
+						if (k + 1 <  a_metadata.columns.length) {l_string2 += ',';}
+						l_block.appendLine(l_string2)
+					//}
+				}
+			l_block
+			.appendLine('        ]')
+			.appendLine('    } );')
+
+
+		var l_toolbarPlus = '';
+		if (a_metadata.hasOwnProperty('toolbar'))
+		{
+			l_toolbarPlus = '&nbsp;&nbsp; ';
+			for (var xy=0; xy < a_metadata.toolbar.length; xy++)
+			{
+				l_toolbarPlus += '<button id="' + a_metadata.toolbar[xy].button + '" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="' + a_metadata.toolbar[xy].title + '" ><span class="' + a_metadata.toolbar[xy].icon + '" /></button>';
+				//{button: "ButtonReset", title: "Resetear Password", icon: "fa fa-file-powerpoint-o", URL: "api_resetpass"}]
+			}
+		}
+
+		var l_toolbar = '$("div.toolbar").html(\'' +
+				'<button type="button" onclick="location.href=&#39;/sys/panel&#39;" data-toggle="tooltip" data-placement="top" title="Panel de opciones" class="btn btn-secondary"><span class="fa fa-home" /></button> ' +
+				'&nbsp;&nbsp; ' +
+				'<button id="ButtonAdd" onclick="location.href=&#39;/sys/' + a_metadata.name + '_new&#39;" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Adicionar Registro" ><span class="fa fa-file-text-o" /></button>' + 
+				'<button id="ButtonEdit" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Editar Registro" ><span class="fa fa-pencil-square-o" /></button>' +
+				'<button id="ButtonDel" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Borrar Registro"><span class="fa fa-times" /></button>' +
+				l_toolbarPlus +
+				'\');';
+				
+		l_block
+		//.appendLine('$("div.toolbar").html(\'<button type="button" onclick="location.href=&#39;/sys/menu&#39;" data-toggle="tooltip" data-placement="top" title="Menu de opciones" class="btn btn-secondary"><span class="fa fa-home" /></button> &nbsp;&nbsp; <button id="ButtonAdd" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Adicionar Registro" onclick="location.href=&#39;/sys/pais_new&#39;" ><span class="fa fa-file-text-o" /></button><button id="ButtonEdit" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Editar Registro" ><span class="fa fa-pencil-square-o" /></button><button id="ButtonDel" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Borrar Registro"><span class="fa fa-times" /></button>\');')
+		.appendLine(l_toolbar)
+		.appendLine('                   ')
+		
+		// Select ROW
+		.appendLine('    $(\'#example tbody\').on( \'click\', \'tr\', function () {')
+		.appendLine('        if ( $(this).hasClass(\'selected\') ) {')
+		.appendLine('            $(this).removeClass(\'selected\');')
+		.appendLine('        }')
+		.appendLine('        else {')
+		.appendLine('            table.$(\'tr.selected\').removeClass(\'selected\');')
+		.appendLine('            $(this).addClass(\'selected\');')
+		.appendLine('        }')
+		.appendLine('    } );')
+		.appendLine(' ')
+		// Select ROW
+
+		// Edit button
+		.appendLine('	$("#ButtonEdit").click( function () {')
+		.appendLine('		try {')
+		.appendLine('  			var l_Item = ' + GetPrimaryKey(a_metadata).join(" + '-' + ") + ';')   //table.row(".selected").data()[0];
+		.appendLine('  			var l_RecursoURL = "/sys/' + a_metadata.name + '_edit/"+l_Item; ')
+		.appendLine('			location.href = l_RecursoURL; ')
+		.appendLine('		}')
+		.appendLine('		catch(err) {')
+		.appendLine('			swal({title: "Click en una fila para seleccionar", text: "Operacion Cancelada", icon:"error", buttons: false, timer:3000});')
+		.appendLine('		}')
+		.appendLine('	} );')
+		.appendLine(' ')
+		// Edit button
+
+		// Del button
+		.appendLine('	$("#ButtonDel").click( function () {')
+		//.appendLine(' 		 console.log( table.row(".selected").data()[0] ); console.log(table.row(".selected").data());')
+		.appendLine('		try {')
+		.appendLine('			var l_RecursoURL = "/api/' + a_metadata.name + '";  ')
+		.appendLine('			var l_Item = ' + GetPrimaryKey(a_metadata).join(" + '-' + ") + '; ')
+		.appendLine('		}')
+		.appendLine('		catch(err) {')
+		.appendLine('			swal({title: "Click en una fila para seleccionar", text: "Operacion Cancelada", icon:"error", buttons: false, timer:3000});')
+		.appendLine('			return;')
+		.appendLine('		}')
+		.appendLine('	swal')
+		.appendLine('	({')
+		.appendLine('	  title: "¿Desea Eliminar el Registro?",')
+		.appendLine('	  text: "Una vez Eliminado, No podra ser Recuperado",')
+		.appendLine('	  icon: "warning",')
+		.appendLine('	  buttons: true,')
+		.appendLine('	  dangerMode: true,')
+		.appendLine('	})')
+		.appendLine('	.then((willDelete) => {')
+		.appendLine('	  if (willDelete) ')
+		.appendLine('	  {')
+		.appendLine(' ')
+		.appendLine('		// Call Web API to get a list of Product')
+		.appendLine('		$.ajax({')
+		.appendLine('			url: l_RecursoURL+"/"+l_Item,')
+		.appendLine('			type: "DELETE",')
+		.appendLine('		success: function (respuesta)')
+		.appendLine('		{')
+		.appendLine('        	table.row(".selected").remove().draw( false );')
+		.appendLine('		  	swal(')
+		.appendLine('		  	{')
+		.appendLine('		  	title: "Registro Eliminado", ')
+		.appendLine('		  	text: "Id de registro "+l_Item, ')
+		.appendLine('		  	icon: "success", ')
+		.appendLine('			buttons: false,')
+		.appendLine('			timer: 3000 ')
+		.appendLine('			});},')
+		.appendLine('		error: function (request, message, error)')
+		.appendLine('		{ handleException(request, message, error);}')
+		.appendLine('		   ')
+		.appendLine('		 }); ')
+		.appendLine(' ')
+		.appendLine('	  } else ')
+		.appendLine('	  {')
+		.appendLine('		swal({title: "Operacion Cancelada", text: "Id de registro "+l_Item, icon:"error", buttons: false, timer:3000});')
+		.appendLine('	  }')
+		.appendLine('	});')
+		.appendLine('					')
+		.appendLine('    } );')
+		// Del button
+		
+		// Custom button
+		if (a_metadata.hasOwnProperty('toolbar'))
+		{
+			for (var yx=0; yx < a_metadata.toolbar.length; yx++)
+			{
+				//a_metadata.toolbar[xy].button 
+				//' + a_metadata.toolbar[xy].title + '
+				//' + a_metadata.toolbar[xy].icon + '
+		
+				l_block
+				.appendLine('	$("#' + a_metadata.toolbar[yx].button + '").click( function () {')
+				.appendLine('		try {')
+				.appendLine('			var l_RecursoURL = "' + a_metadata.toolbar[yx].URL + '";  ')
+				.appendLine('			var l_Item = ' + GetPrimaryKey(a_metadata).join(" + '-' + ") + '; ')
+				.appendLine('		}')
+				.appendLine('		catch(err) {')
+				.appendLine('			swal({title: "Click en una fila para seleccionar", text: "Operacion Cancelada", icon:"error", buttons: false, timer:3000});')
+				.appendLine('			return;')
+				.appendLine('		}')
+				.appendLine('	swal')
+				.appendLine('	({')
+				.appendLine('	  title: "¿Desea ' + a_metadata.toolbar[yx].title + ' al Registro?",')
+				.appendLine('	  text: "Una vez ' + a_metadata.toolbar[yx].title + ', No podra ser Recuperado",')
+				.appendLine('	  icon: "warning",')
+				.appendLine('	  buttons: true,')
+				.appendLine('	  dangerMode: true,')
+				.appendLine('	})')
+				.appendLine('	.then((willDelete) => {')
+				.appendLine('	  if (willDelete) ')
+				.appendLine('	  {')
+				.appendLine(' ')
+				.appendLine('		// Call Web API to get a list of Product')
+				.appendLine('		$.ajax({')
+				.appendLine('			url: l_RecursoURL+"/"+l_Item,')
+				.appendLine('			type: "' + a_metadata.toolbar[yx].verbo + '",')
+				.appendLine('		success: function (respuesta)')
+				.appendLine('		{')
+				//.appendLine('        	table.row(".selected").remove().draw( false );')
+				.appendLine('		  	swal(')
+				.appendLine('		  	{')
+				.appendLine('		  	title: "Al Registro se le realizo ' + a_metadata.toolbar[yx].title + '", ')
+				.appendLine('		  	text: "Id de registro "+l_Item, ')
+				.appendLine('		  	icon: "success", ')
+				.appendLine('			buttons: false,')
+				.appendLine('			timer: 3000 ')
+				.appendLine('			});},')
+				.appendLine('		error: function (request, message, error)')
+				.appendLine('		{ handleException(request, message, error);}')
+				.appendLine('		   ')
+				.appendLine('		 }); ')
+				.appendLine(' ')
+				.appendLine('	  } else ')
+				.appendLine('	  {')
+				.appendLine('		swal({title: "Operacion Cancelada", text: "Id de registro "+l_Item, icon:"error", buttons: false, timer:3000});')
+				.appendLine('	  }')
+				.appendLine('	});')
+				.appendLine('					')
+				.appendLine('    } );')
+				.appendLine('// fin Custom Button ')
+		
+			}
+		}
+		// Custom button
+		
+		// Habilitar el Tooltips en los botones
+		l_block
+		.appendLine('$(function () {')
+		.appendLine('  $(\'[data-toggle="tooltip"]\').tooltip()')
+		.appendLine('});')
+
+
+		.appendLine('} );')
+		.appendLine('')
+		.appendLine('</script>')
+
+
+		.appendLine('');
+	} // if (a_data)
+		
+	exports.GetHTMLsys(l_block, a_resp);
+}
+
+exports.Mtto_new = function(a_req, a_resp, a_data, a_metadata)
+{
+	if (settings.servConfig.debug){console.log("Procesando HttpMsgs Mtto_new");}
+
+	var block = new StringBuilder({ newline: '\r\n\t' });
+	var l_remote_check = [];
+
+	block.append('\t')
+		.appendLine('')
+		.appendLine('<div class="container body-content">')
+		.appendLine('<br><h1>' + a_metadata.title + '</h1><hr>')
+		//.appendLine('<h2>' + a_metadata.name + '</h2>')
+		.appendLine('<form id="FormDinamic" autocomplete="off">')
+		.appendLine('	<div class="row">')
+		.appendLine('		<div class="col-md-3 col-sm-12">')
+		
+		.appendLine('			<button type="button"  ')
+		.appendLine('                  onclick="location.href=&#39;/sys/panel&#39;" ')
+		.appendLine('                  data-toggle="tooltip" data-placement="top" title="Panel de opciones" ')
+		.appendLine('                  class="btn btn-secondary">')
+		.appendLine('                  <span class="fa fa-home" />')
+		.appendLine('          </button>')	
+		.appendLine('			<button type="button"  ')
+		.appendLine('                  onclick="location.href=&#39;/sys/' + a_metadata.name + '&#39;" ')
+		.appendLine('                  data-toggle="tooltip" data-placement="top" title="Retornar a opciones ' + a_metadata.title + '" ')
+		.appendLine('                  class="btn btn-secondary">')
+		.appendLine('                  <span class="fa fa-reply-all" />')
+		.appendLine('          </button>')
+		
+		.appendLine(' &nbsp;&nbsp; ')
+				
+		.appendLine('			<button type="submit"  ')
+		//.appendLine('                  onclick="itemSave();" ')
+		.appendLine('                  data-toggle="tooltip" data-placement="top" title="Guardar" ')
+		.appendLine('                  class="btn btn-secondary">')
+		.appendLine('                  <span class="fa fa-save" />')
+		.appendLine('          </button>')
+		.appendLine('			<button id="bReset" type="reset"  ')
+		//.appendLine('                  onclick="itemSave();" ')
+		.appendLine('                  data-toggle="tooltip" data-placement="top" title="Limpiar Formulario" ')
+		.appendLine('                  class="btn btn-secondary">')
+		.appendLine('                  <span class="fa fa-ban" />')
+		.appendLine('          </button>')
+		
+		.appendLine('		</div>')
+		.appendLine('	</div>')
+		
+		//.appendLine('<div>key :' + a_metadata.primary_key.toString() + '</div>');
+		
+		for (var j=0; j< a_metadata.columns.length; j++)
+		{
+			var l_required = (a_metadata.columns[j].required) ? "<img src='/img/greendot.jpg' alt='required dot' >":"<img src='/img/whitedot.jpg' alt='required dot' >";
+			var l_data_validetta = [];
+			var l_data_validettaF = "";
+			var l_placeholder = (a_metadata.columns[j].hasOwnProperty('placeholder')) ? "placeholder='" + a_metadata.columns[j].placeholder +"'":"";
+			var l_toUpperLowerCase = "";
+			var l_pattern = "";
+			
+			if (a_metadata.columns[j].required)
+			{ l_data_validetta.push("required"); }
+			
+			if (a_metadata.columns[j].minLength > 0)
+			{ l_data_validetta.push("minLength["+a_metadata.columns[j].minLength+"]"); }
+			
+			l_data_validetta.push("maxLength[" + a_metadata.columns[j].length + "]");
+
+			if (a_metadata.columns[j].hasOwnProperty('email_check'))
+			{ l_data_validetta.push("email"); }
+		
+			if (a_metadata.columns[j].hasOwnProperty('remote_check'))
+			{ 
+				l_data_validetta.push("remote[check_" + a_metadata.columns[j].col + "]");
+				l_remote_check.push('check_' + a_metadata.columns[j].col + ' : { type : "POST", url : "/api_remote/' + a_metadata.name + '", datatype : "json" }');
+			}
+			
+			l_data_validettaF = 'data-validetta="' + l_data_validetta.toString() + '"';
+			
+			if (a_metadata.columns[j].hasOwnProperty('pattern'))
+			{ l_pattern = 'pattern= "' + a_metadata.columns[j].pattern + '"'; }
+			
+			if (a_metadata.columns[j].hasOwnProperty('toUpperLowerCase'))
+			{
+				if (a_metadata.columns[j].toUpperLowerCase)
+				{l_toUpperLowerCase = 'onkeyup="this.value = this.value.toUpperCase()"';}
+				else
+				{l_toUpperLowerCase = 'onkeyup="this.value = this.value.toLowerCase()"';}
+			}
+			
+			block
+			.appendLine('<div class="form-group row" >')
+			.appendLine('	<label class="col-sm-12 col-md-3 col-form-label" for="input_' + a_metadata.columns[j].col + '">' + l_required + '&nbsp;&nbsp;&nbsp;' + a_metadata.columns[j].label +  '</label>')
+			//.appendLine('	<label class="col-sm-2 col-form-label" >' + a_metadata.columns[j].type + ' ' + a_metadata.columns[j].length + '</label>')
+			.appendLine('	<div class="col-sm-12 col-md-9">');
+
+			
+			switch (a_metadata.columns[j].type)
+			{
+				case "int":
+					block.appendLine('		<div class="form-group">')
+					block.appendLine('		<input type="number" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" min="' + a_metadata.columns[j].minLength + '" max="' + a_metadata.columns[j].max + '" step="'+ a_metadata.columns[j].step + '" ' + l_data_validettaF + '>')
+					block.appendLine('		</div>')
+				break;
+				
+				case "float":
+					block.appendLine('		<input type="number" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '"  min="0" value="0" step="0.01" ' + l_pattern + ' >') // min="' + a_metadata.columns[j].minLength + '" max="' + a_metadata.columns[j].length + '"
+				break;
+
+				case "textarea":
+					block.appendLine('		<textarea class="form-control" style="margin-top: 0px; margin-bottom: 0px; height: 220px;" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" row="3" ' + l_toUpperLowerCase + ' maxlength="' + a_metadata.columns[j].length + '" ></textarea>')
+				break;
+				
+				case "varchar":
+					if (a_metadata.columns[j].hasOwnProperty('dropdownlist'))
+					{
+						console.log( a_metadata.columns[j].col);
+						
+						if (a_metadata.columns[j].required)
+						{ l_data_validettaF = 'required'; } // NO FUNCIONA 'data-validetta="required"'
+						else
+						{ l_data_validettaF = ""; }
+						
+						block.appendLine('		<div class="form-group">')
+						block.appendLine('			<select class="custom-select" name="' + a_metadata.columns[j].col + '" id="input_' + a_metadata.columns[j].col + '" ' + l_data_validettaF + ' >')
+						block.appendLine('			<option value="" selected disabled hidden>Elija su Opcion</option></select>') // value="" selected disabled hidden
+						block.appendLine('			</select>')
+						block.appendLine('		</div>')
+						
+						block.appendLine('<script type="text/javascript">')
+						block.appendLine('$(document).ready(function ()')
+						block.appendLine('{')
+						block.appendLine('	GetValues("/api_ddl/' + a_metadata.name + '", "input_' + a_metadata.columns[j].col + '", "<option value=\'[[cod]]\' >[[nombre]]</option>", "' + a_metadata.columns[j].col + '");')
+						block.appendLine('});')
+						block.appendLine('</script>')
+						
+					}
+					else if (a_metadata.columns[j].hasOwnProperty('dropdownsearch'))
+					{
+						block.appendLine('		<div class="form-group">')
+						block.appendLine('		<input type="text" ')
+						block.appendLine('		'+ l_placeholder + ' ')
+						block.appendLine('		class="form-control flexdatalist" ') // flexdatalist
+						block.appendLine('		data-min-length="3" ')
+						block.appendLine('		data-selection-required="' + a_metadata.columns[j].required + '" ')
+						block.appendLine('		list="input_' + a_metadata.columns[j].col + '" ')
+						block.appendLine('		value="SLV" ')
+						block.appendLine('		name="' + a_metadata.columns[j].col + '" > ')
+						block.appendLine('')
+						block.appendLine('		<datalist id="input_' + a_metadata.columns[j].col + '"></datalist>')
+						block.appendLine('		</div>')
+						
+						block.appendLine('<script type="text/javascript">')
+						block.appendLine('$(document).ready(function ()')
+						block.appendLine('{')
+						block.appendLine('	GetValues("/api_ddl/' + a_metadata.name + '", "input_' + a_metadata.columns[j].col + '", "<option value=\'[[cod]]\' >[[nombre]]</option>", "' + a_metadata.columns[j].col + '");')
+						block.appendLine('});')
+						block.appendLine('</script>')
+					}
+					else if (a_metadata.columns[j].hasOwnProperty('radio'))
+					{
+						for (var r=0; r < a_metadata.columns[j].radio.length; r++)
+						{
+							block.appendLine('		<div class="form-check">')
+							block.appendLine('			<label class="form-check-label">')
+							block.appendLine('				<input type="radio" onclick="RadioClick_' + a_metadata.columns[j].col + '(this.value);" class="form-check-input" name="' + a_metadata.columns[j].col + '" id="input_' + a_metadata.columns[j].col + r.toString() + '" value="' + a_metadata.columns[j].radio[r].val + '" >')
+							block.appendLine('				' + a_metadata.columns[j].radio[r].label + '')
+							block.appendLine('		    </label>')
+							block.appendLine('		</div>')
+						}
+						
+						block.appendLine('		<script>')
+						block.appendLine('		function RadioClick_' + a_metadata.columns[j].col + '(a_selected) ')
+						block.appendLine('		{')
+						block.appendLine('			document.getElementById("input_' + a_metadata.columns[j].col + '").value=a_selected;')
+						block.appendLine('		}')
+						block.appendLine('		</script>')
+
+						block.appendLine('		<input type="hidden" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" size="' + a_metadata.columns[j].length + '" ' + l_placeholder + ' maxlength="' + a_metadata.columns[j].length + '" ' + l_data_validettaF + ' ' + l_toUpperLowerCase + ' >')
+						
+					}
+					else if (a_metadata.columns[j].hasOwnProperty('list'))
+					{					
+						block.appendLine('		<div class="form-group">')
+						block.appendLine('			<select class="custom-select" name="' + a_metadata.columns[j].col + '" id="input_' + a_metadata.columns[j].col + '" ' + l_data_validettaF + ' >')
+						for (var r=0; r < a_metadata.columns[j].list.length; r++)
+						{
+							block.appendLine('				<option value="' + a_metadata.columns[j].list[r].val + '">' + a_metadata.columns[j].list[r].label + '</option>')
+						}
+						block.appendLine('			</select>')
+						block.appendLine('		</div>')
+					}
+					else
+					{ 	block.appendLine('		<div class="form-group">')
+						block.appendLine('		<input type="text" class="form-control" id="input_' + 
+										a_metadata.columns[j].col +
+										'" name="' + a_metadata.columns[j].col +
+										'" size="' + a_metadata.columns[j].length + '" ' + l_placeholder +
+										' maxlength="' + a_metadata.columns[j].length + '" ' +
+										l_data_validettaF + ' ' + l_toUpperLowerCase + ' ' + l_pattern + ' >') 
+						block.appendLine('		</div>')
+					}
+				break;
+				
+				case "char":
+					block.appendLine('		<input type="text" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" size="' + a_metadata.columns[j].length + '" ' + l_placeholder + ' maxlength="' + a_metadata.columns[j].length + '" ' + l_data_validettaF + ' ' + l_toUpperLowerCase + ' >')
+				break;
+				
+				case "time":
+					block.appendLine('		<input type="time" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" value="13:30" >')
+				break;
+				
+				case "date":
+					var fecha = new Date();
+					//var hora = fecha.getFullYear() + "/" + fecha.getMonth() + "/" + fecha.getDate() + " " + fecha.getHours() + ":" + fecha.getMinutes() + ":" + fecha.getSeconds() + ":" + fecha.getMilliseconds();
+					block.appendLine('		<input type="date" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" value="' + fecha.getFullYear() + "-0" + fecha.getMonth() + "-0" + fecha.getDate() + '" >') // min="' + a_metadata.columns[j].min + '" max="' + a_metadata.columns[j].max + '" step="1"     onload="setDefaultDate(\'input_' + a_metadata.columns[j].col + '\')" 
+				break;
+
+				default:
+					block.appendLine('		<input type="text" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" size="' + a_metadata.columns[j].length + '" ' + l_placeholder + ' maxlength="' + a_metadata.columns[j].length + '" ' + l_data_validettaF + ' ' + l_toUpperLowerCase + ' >')
+				break;
+			}
+			block
+			.appendLine('	</div>')
+			.appendLine('</div>');
+		}
+		
+		block
+		.appendLine('</form>')
+
+		.appendLine('<hr>')
+
+		.appendLine('<script type="text/javascript">')
+		.appendLine('var ITEM = {');
+		for (var k=0; k< a_metadata.columns.length; k++)
+		{
+			switch (a_metadata.columns[k].type)
+			{
+				case "int":
+					block.appendLine(a_metadata.columns[k].col + ': ' + '0, ');
+				break;
+				
+				case "float":
+					block.appendLine(a_metadata.columns[k].col + ': ' + '0.0, ');
+				break;
+				
+				case "char":
+				case "varchar":
+				case "varcharlbox":
+				case "textarea":
+					block.appendLine(a_metadata.columns[k].col + ': ' + '"", ');
+				break;
+				
+				case "time":
+					block.appendLine(a_metadata.columns[k].col + ': ' + '"00:00", ');
+				break;
+				
+				case "date":
+					block.appendLine(a_metadata.columns[k].col + ': ' + '"01/01/1999", ');
+				break;
+
+				default:
+					block.appendLine(a_metadata.columns[k].col + ': ' + '"", ');
+				break;
+			}
+		}
+		block
+		.appendLine('}')
+		.appendLine('function itemSave() ')
+		.appendLine('{')
+		
+		.appendLine('	ITEM = new Object();');
+
+		for (var l=0; l< a_metadata.columns.length; l++)
+		{ block.appendLine('ITEM.' + a_metadata.columns[l].col + ' = $("#input_' + a_metadata.columns[l].col + '").val();'); }
+
+		block
+		.appendLine('	itemInsert("/api/' + a_metadata.table + '", ITEM);')
+		.appendLine('	$("#bReset").click();')
+		.appendLine('}')
+
+		.appendLine('</script>')
+		.appendLine("<script src='/js/js_ctrlvalues.js' ></script>")
+		
+		.appendLine('<script>')
+		.appendLine('$(document).ready(function() {')
+		.appendLine('	$("#FormDinamic").validetta(')
+		.appendLine('		{realTime: true,')
+		.appendLine('		display : "inline", // bubble or inline')
+		.appendLine('		validators: {')
+		.appendLine('			remote : {')
+		// Ejemplo: check_iso3 : { type : "POST", url : "/api_remote/pais", datatype : "json" }
+		.appendLine(l_remote_check.toString())
+		.appendLine('			}')
+		.appendLine('		},')
+		
+		.appendLine('onValid : function( event ) ')
+		.appendLine('{ ')
+		.appendLine(' event.preventDefault(); // Evitará la presentación/envio del formulario')
+		.appendLine(' itemSave();')
+		.appendLine('},')
+		.appendLine('onError : function( event )')
+		.appendLine('{  ')
+		.appendLine('	swal(')
+		.appendLine('		  	{')
+		.appendLine('		  	title: "Registro NO Valido", ')
+		.appendLine('		  	text: "Los Valores NO pasaron las validaciones, favor revisar", ')
+		.appendLine('		  	icon: "warning", ')
+		.appendLine('			buttons: false,')
+		.appendLine('			timer: 4000 ')
+		.appendLine('			});')
+		.appendLine('}  ')
+		
+		.appendLine('	});')
+		
+		// Habilitar el Tooltips en los botones
+		.appendLine('$(function () {')
+		.appendLine('  $(\'[data-toggle="tooltip"]\').tooltip()')
+		.appendLine('});')
+		
+		.appendLine('});')
+		.appendLine('</script>')
+		
+		.appendLine('<script type="text/javascript">')
+		.appendLine('	function setDefaultDate(a_ElementById)')
+		.appendLine('	{')
+		.appendLine('		alert("X");')
+		.appendLine('		var today = new Date();')
+		//.appendLine('		$("#" + a_ElementById).val() = today.getFullYear() + "-" + ("0" + (today.getMonth() + 1)).slice(-2) + "-" + ("0" + today.getDate()).slice(-2);')
+		.appendLine('		document.getElementById(a_ElementById).value = "1979-02-02"; ')
+		.appendLine('	};')
+		.appendLine('</script>')
+	//  document.getElementById(a_ElementById).value =
+		.appendLine('</div>')
+		.appendLine('');
+	
+	exports.GetHTMLsys(block, a_resp);
+}
+
+
+exports.Mtto_edit = function(a_req, a_resp, a_data, a_metadata)
+{
+	if (settings.servConfig.debug){console.log("Procesando HttpMsgs Mtto_edit");}
+
+	var block = new StringBuilder({ newline: '\r\n\t' });
+	var l_remote_check = [];
+
+	block.append('\t')
+		.appendLine('')
+		.appendLine('<div class="container body-content">')
+		.appendLine('<br><h1>' + a_metadata.title + '</h1><hr>')
+		.appendLine('<form id="FormDinamicEdit" autocomplete="off">')
+		.appendLine('	<div class="row">')
+		.appendLine('		<div class="col-md-3 col-sm-12">')
+		//.appendLine('			<button type="button"  ')
+		//.appendLine('                  onclick="itemSave();" ')
+		//.appendLine('                  class="btn btn-secondary">')
+		//.appendLine('                  <span class="fa fa-save" />')
+		//.appendLine('          </button>')
+		
+		.appendLine('			<button type="button"  ')
+		.appendLine('                  onclick="location.href=&#39;/sys/panel&#39;" ')
+		.appendLine('                  data-toggle="tooltip" data-placement="top" title="Panel de opciones" ')
+		.appendLine('                  class="btn btn-secondary">')
+		.appendLine('                  <span class="fa fa-home" />')
+		.appendLine('          </button>')	
+		.appendLine('			<button type="button"  ')
+		.appendLine('                  onclick="location.href=&#39;/sys/' + a_metadata.name + '&#39;" ')
+		.appendLine('                  data-toggle="tooltip" data-placement="top" title="Retornar a opciones ' + a_metadata.title + '" ')
+		.appendLine('                  class="btn btn-secondary">')
+		.appendLine('                  <span class="fa fa-reply-all" />')
+		.appendLine('          </button>')
+		
+		.appendLine(' &nbsp;&nbsp; ')
+				
+		.appendLine('			<button type="submit"  ')
+		//.appendLine('                  onclick="itemSave();" ')
+		.appendLine('                  data-toggle="tooltip" data-placement="top" title="Guardar" ')
+		.appendLine('                  class="btn btn-secondary">')
+		.appendLine('                  <span class="fa fa-save" />')
+		.appendLine('          </button>')
+		
+		.appendLine('		</div>')
+		.appendLine('	</div>')
+		
+		//.appendLine('<div>key :' + a_metadata.primary_key.toString() + '</div>');
+		
+		for (var j=0; j< a_metadata.columns.length; j++)
+		{
+			var l_required = (a_metadata.columns[j].required) ? "<img src='/img/greendot.jpg' alt='' >":"<img src='/img/whitedot.jpg' alt='' >";
+			var l_data_validetta = [];
+			var l_data_validettaF = "";
+			var l_placeholder = (a_metadata.columns[j].hasOwnProperty('placeholder')) ? "placeholder='" + a_metadata.columns[j].placeholder +"'":"";
+			var l_toUpperLowerCase = "";
+			var l_disabled = "";
+			var l_pattern = "";
+			
+			if (a_metadata.columns[j].required)
+			{ l_data_validetta.push("required"); }
+			
+			if (a_metadata.columns[j].minLength > 0)
+			{ l_data_validetta.push("minLength["+a_metadata.columns[j].minLength+"]"); }
+			
+			l_data_validetta.push("maxLength[" + a_metadata.columns[j].length + "]");
+			
+			if (a_metadata.columns[j].hasOwnProperty('email_check'))
+			{ l_data_validetta.push("email"); }
+		
+			if (a_metadata.columns[j].hasOwnProperty('pattern'))
+			{ l_pattern = 'pattern= "' + a_metadata.columns[j].pattern + '"'; }
+			
+			if (a_metadata.columns[j].hasOwnProperty('remote_check'))
+			{ 
+				l_data_validetta.push("remote[check_" + a_metadata.columns[j].col + "]");
+				l_remote_check.push('check_' + a_metadata.columns[j].col + ' : { type : "POST", url : "/api_remote/' + a_metadata.name + '", datatype : "json" }');
+			}
+			
+			l_data_validettaF = 'data-validetta="' + l_data_validetta.toString() + '"';
+			
+			if (a_metadata.columns[j].hasOwnProperty('toUpperLowerCase'))
+			{
+				if (a_metadata.columns[j].toUpperLowerCase)
+				{l_toUpperLowerCase = 'onkeyup="this.value = this.value.toUpperCase()"';}
+				else
+				{l_toUpperLowerCase = 'onkeyup="this.value = this.value.toLowerCase()"';}
+			}
+
+			// Verificando que la columna ¿es o no? Editable
+			if (a_metadata.columns[j].hasOwnProperty('allowNoEdit'))
+			{
+				if (a_metadata.columns[j].allowNoEdit)
+				{ 
+					l_disabled = "disabled";
+					l_toUpperLowerCase = "";
+					l_data_validettaF = "";
+				}
+			}
+
+
+			block
+			.appendLine('<div class="form-group row" >')
+			.appendLine('	<label class="col-sm-12 col-md-3 col-form-label" for="input_' + a_metadata.columns[j].col + '">' + l_required + '&nbsp;&nbsp;&nbsp;' + a_metadata.columns[j].label +  '</label>')
+			//.appendLine('	<label class="col-sm-2 col-form-label" >' + a_metadata.columns[j].type + ' ' + a_metadata.columns[j].length + '</label>')
+			.appendLine('	<div class="col-sm-12 col-md-9">');
+
+			switch (a_metadata.columns[j].type)
+			{
+				case "int":
+					//block.appendLine('		<input type="number" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" value="' + a_data[0][a_metadata.columns[j].col] + '">');
+					block.appendLine('		<input type="number" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" value="' + a_data[0][a_metadata.columns[j].col] + '" min="' + a_metadata.columns[j].minLength + '" max="' + a_metadata.columns[j].length + '" step="1" ' + l_disabled + '>')
+				break;
+				
+				case "float":
+					block.appendLine('		<input type="number" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" value="' + a_data[0][a_metadata.columns[j].col] + '" min="0" step="0.01" ' + l_disabled + ' >') //+ l_pattern + '
+				break;
+
+				case "textarea":
+					//block.appendLine('		<textarea class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" row="3" placeholder="' + a_data[0][a_metadata.columns[j].col] +'">' + a_data[0][a_metadata.columns[j].col] + '</textarea>');
+					block.appendLine('		<textarea class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" row="3" placeholder="' + a_data[0][a_metadata.columns[j].col] +'" ' + l_toUpperLowerCase + ' maxlength="' + a_metadata.columns[j].length + '" ' + l_disabled + ' >' + a_data[0][a_metadata.columns[j].col] + '</textarea>')
+				break;
+				
+				case "varchar":
+					if (a_metadata.columns[j].hasOwnProperty('dropdownlist'))
+					{
+						console.log( a_metadata.columns[j].col);
+						
+						if (a_metadata.columns[j].required)
+						{ l_data_validettaF = 'required'; } // NO FUNCIONA 'data-validetta="required"'
+						else
+						{ l_data_validettaF = ""; }
+						
+						block.appendLine('		<div class="form-group">')
+						block.appendLine('			<select class="custom-select" name="' + a_metadata.columns[j].col + '" id="input_' + a_metadata.columns[j].col + '" ' + l_data_validettaF + ' >')
+						block.appendLine('			<option value="" selected disabled hidden>Elija su Opcion</option></select>') // value="" selected disabled hidden
+						block.appendLine('			</select>')
+						block.appendLine('		</div>')
+						
+						block.appendLine('<script type="text/javascript">')
+						block.appendLine('$(document).ready(function ()')
+						block.appendLine('{')
+						block.appendLine('	GetValues("/api_ddl/' + a_metadata.name + '", "input_' + a_metadata.columns[j].col + '", "<option value=\'[[cod]]\' >[[nombre]]</option>", "' + a_metadata.columns[j].col + '");')
+						block.appendLine('});')
+						block.appendLine('</script>')
+						
+					}
+					else if (a_metadata.columns[j].hasOwnProperty('radio'))
+					{
+						for (var r=0; r < a_metadata.columns[j].radio.length; r++)
+						{
+							block.appendLine('		<div class="form-check">')
+							block.appendLine('			<label class="form-check-label">')
+							block.appendLine('				<input type="radio" onclick="RadioClick_' + a_metadata.columns[j].col + '(this.value);" class="form-check-input" name="' + a_metadata.columns[j].col + '" id="input_' + a_metadata.columns[j].col + r.toString() + '" value="' + a_metadata.columns[j].radio[r].val + '" >')
+							block.appendLine('				' + a_metadata.columns[j].radio[r].label + '')
+							block.appendLine('		    </label>')
+							block.appendLine('		</div>')
+						}
+						
+						block.appendLine('		<script>')
+						block.appendLine('		function RadioClick_' + a_metadata.columns[j].col + '(a_selected) ')
+						block.appendLine('		{')
+						block.appendLine('			document.getElementById("input_' + a_metadata.columns[j].col + '").value=a_selected;')
+						block.appendLine('		}')
+						block.appendLine('		</script>')
+
+						block.appendLine('		<input type="hidden" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" size="' + a_metadata.columns[j].length + '" ' + l_placeholder + ' maxlength="' + a_metadata.columns[j].length + '" ' + l_data_validettaF + ' ' + l_toUpperLowerCase + ' >')
+						
+					}
+					else if (a_metadata.columns[j].hasOwnProperty('list'))
+					{					
+						block.appendLine('		<div class="form-group">')
+						block.appendLine('			<select class="custom-select" name="' + a_metadata.columns[j].col + '" id="input_' + a_metadata.columns[j].col + '" ' + l_data_validettaF + ' >')
+						for (var r=0; r < a_metadata.columns[j].list.length; r++)
+						{
+							var l_selectedItem = "";
+							if (a_data[0][a_metadata.columns[j].col] ==  a_metadata.columns[j].list[r].val)
+							{ l_selectedItem = " selected "}
+							block.appendLine('				<option value="' + a_metadata.columns[j].list[r].val + '" ' + l_selectedItem + ' >' + a_metadata.columns[j].list[r].label + '</option>')
+						}
+						block.appendLine('			</select>')
+						block.appendLine('		</div>')
+					}
+					else
+					{ 	block.appendLine('		<div class="form-group">')
+						block.appendLine('		<input type="text" class="form-control" id="input_' + 
+										a_metadata.columns[j].col +
+										'" name="' + a_metadata.columns[j].col +
+										'" value="' + a_data[0][a_metadata.columns[j].col] +
+										'" size="' + a_metadata.columns[j].length + '" ' + l_placeholder +
+										' maxlength="' + a_metadata.columns[j].length + '" ' +
+										l_data_validettaF + ' ' + l_toUpperLowerCase + ' ' + l_pattern + ' ' + l_disabled + ' >') 
+						block.appendLine('		</div>')
+					}
+					
+					//block.appendLine('		<input type="text" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" value="' + a_data[0][a_metadata.columns[j].col] + '" size="' + a_metadata.columns[j].length + '" ' + l_placeholder + ' 
+					//                           maxlength="' + a_metadata.columns[j].length + '" ' +
+					//							l_data_validettaF + ' ' + l_toUpperLowerCase + ' ' + l_disabled + ' >')
+				break;
+				
+				case "char":
+					//block.appendLine('		<input type="text" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" value="' + a_data[0][a_metadata.columns[j].col] + '" ' + l_disabled + ' >');
+					block.appendLine('		<input type="text" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" value="' + a_data[0][a_metadata.columns[j].col] + '" size="' + a_metadata.columns[j].length + '" ' + l_placeholder + ' maxlength="' + a_metadata.columns[j].length + '" ' + l_data_validettaF + ' ' + l_toUpperLowerCase + ' ' + l_disabled + ' >')
+				break;
+				
+				case "time":
+					//block.appendLine('		<input type="time" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" value="' + a_data[0][a_metadata.columns[j].col] + '" ' + l_disabled + ' >');
+					block.appendLine('		<input type="time" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" value="' + a_data[0][a_metadata.columns[j].col] + '" min="1" max="5" step="1" ' + l_disabled + ' >')
+				break;
+				
+				case "date":
+					block.appendLine('		<input type="date" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" value="' + a_data[0][a_metadata.columns[j].col] + '" ' + l_disabled + ' >')
+				break;
+				
+				default:
+				break;
+			}
+			block
+			.appendLine('	</div>')
+			.appendLine('</div>');
+		}
+		
+		block
+		.appendLine('</form>')
+		.appendLine('<hr>')
+
+		.appendLine('<script type="text/javascript">')
+		.appendLine('var ITEM = {');
+		for (var k=0; k< a_metadata.columns.length; k++)
+		{
+			switch (a_metadata.columns[k].type)
+			{
+				case "int":
+					block.appendLine(a_metadata.columns[k].col + ': ' + '0, ');
+				break;
+				
+				case "float":
+					block.appendLine(a_metadata.columns[k].col + ': ' + '0.0, ');
+				break;
+				
+				case "char":
+				case "varchar":
+				case "textarea":
+					block.appendLine(a_metadata.columns[k].col + ': ' + '"", ');
+				break;
+				
+				case "time":
+					block.appendLine(a_metadata.columns[k].col + ': ' + '"00:00", ');
+				break;
+				
+				case "date":
+					block.appendLine(a_metadata.columns[k].col + ': ' + '"01/01/1999", ');
+				break;
+
+				default:
+					block.appendLine(a_metadata.columns[k].col + ': ' + '"", ');
+				break;
+			}
+		}
+		block
+		.appendLine('}')
+		.appendLine('function itemSave() ')
+		.appendLine('{')
+		
+		.appendLine('ITEM = new Object();');
+
+		for (var l=0; l< a_metadata.columns.length; l++)
+		{ block.appendLine('ITEM.' + a_metadata.columns[l].col + ' = $("#input_' + a_metadata.columns[l].col + '").val();'); }
+
+		block
+		.appendLine('itemUpdate("/api/' + a_metadata.table + '/' + a_data[0].id + '", ITEM);')
+		.appendLine('')
+		.appendLine('}')
+
+		.appendLine('</script>')
+		.appendLine("<script src='/js/js_ctrlvalues.js' ></script>")
+		
+		.appendLine('<script>')
+		.appendLine('$(document).ready(function() {')
+		.appendLine('	$("#FormDinamicEdit").validetta(')
+		.appendLine('		{realTime: true,')
+		.appendLine('		display : "inline", // bubble or inline')
+		.appendLine('		validators: {')
+		.appendLine('			remote : {')
+		// Ejemplo: check_iso3 : { type : "POST", url : "/api_remote/pais", datatype : "json" }
+		.appendLine(l_remote_check.toString())
+		.appendLine('			}')
+		.appendLine('		},')
+		
+		.appendLine('onValid : function( event ) ')
+		.appendLine('{ ')
+		.appendLine(' event.preventDefault(); // Evitará la presentación/envio del formulario')
+		.appendLine(' itemSave();')
+		.appendLine('},')
+		.appendLine('onError : function( event )')
+		.appendLine('{  ')
+		.appendLine('	swal(')
+		.appendLine('		  	{')
+		.appendLine('		  	title: "Registro NO Valido", ')
+		.appendLine('		  	text: "Los Valores NO pasaron las validaciones, favor revisar", ')
+		.appendLine('		  	icon: "warning", ')
+		.appendLine('			buttons: false,')
+		.appendLine('			timer: 4000 ')
+		.appendLine('			});')
+		.appendLine('}  ')
+		
+		.appendLine('	});')
+		
+		// Habilitar el Tooltips en los botones
+		.appendLine('$(function () {')
+		.appendLine('  $(\'[data-toggle="tooltip"]\').tooltip()')
+		.appendLine('});')
+		
+		.appendLine('});')
+		.appendLine('</script>')
+		
+		.appendLine('</div>')
+		.appendLine('');
+	
+	exports.GetHTMLsys(block, a_resp);
+}
+
+exports.Mtto_panel = function(a_req, a_resp, a_metadata)
+{
+	if (settings.servConfig.debug){console.log("Procesando HttpMsgs Mtto_panel");}
+	
+	var l_grupos = "";
+	var l_opciones = "";
+
+	var block = new StringBuilder({ newline: '\r\n\t' });
+	var l_remote_check = [];
+
+	for (var l=0; l< a_metadata.grupos.length; l++)
+	{ 
+		l_grupos += '	  <a class="nav-link" id="v-pills-' + a_metadata.grupos[l].id + '-tab" data-toggle="pill" href="#v-pills-' + a_metadata.grupos[l].id + '" role="tab" aria-controls="v-pills-' + a_metadata.grupos[l].id + '" aria-selected="false">' + a_metadata.grupos[l].nombre + '</a> \r\n\t';
+		l_opciones += '      <div class="tab-pane fade" id="v-pills-' + a_metadata.grupos[l].id + '" role="tabpanel" aria-labelledby="v-pills-' + a_metadata.grupos[l].id + '-tab"> \r\n\t';
+		for (var h=0; h< a_metadata.grupos[l].opciones.length; h++)
+		{
+			l_opciones += 	'<button type="button" ' +
+							' onclick="location.href=&#39;' + a_metadata.grupos[l].opciones[h].url + '&#39;" ' +
+							' data-toggle="tooltip" data-placement="bottom" title="' + a_metadata.grupos[l].opciones[h].opcion + '" ' +
+							' class="btn btn-secondary" style="width: 10rem; margin: 15px;" >' +
+							' <span class="' + a_metadata.grupos[l].opciones[h].icono + ' fa-5x text-black-50"  aria-hidden="true" /><hr>' +
+							' <h6 class="text-muted" style="font-family:&#39;Century Gothic&#39;, Arial">' + a_metadata.grupos[l].opciones[h].opcion + '</h6>' +
+							'</button> \r\n\t';
+		}
+		l_opciones += '</div> \r\n\t';
+	}
+	
+	block.append('\t')
+		.appendLine('')
+		.appendLine('<div class="container body-content">')
+		.appendLine('<br><h1>Panel de Opciones</h1><hr>')
+		//.appendLine('<form id="FormDinamicEdit" autocomplete="off">')
+		.appendLine('	<div class="row">')
+		.appendLine('		<div class="col-md-3 col-sm-12">')
+	
+		//.appendLine('			<button type="button"  ')
+		//.appendLine('                  onclick="location.href=&#39;/sys/menu&#39;" ')
+		//.appendLine('                  data-toggle="tooltip" data-placement="top" title="Menu de opciones" ')
+		//.appendLine('                  class="btn btn-secondary">')
+		//.appendLine('                  <span class="fa fa-home" />')
+		//.appendLine('          </button>')	
+		//.appendLine('			<button type="button"  ')
+		//.appendLine('                  onclick="location.href=&#39;/sys/' + a_metadata.name + '&#39;" ')
+		//.appendLine('                  data-toggle="tooltip" data-placement="top" title="Retornar a opciones ' + a_metadata.title + '" ')
+		//.appendLine('                  class="btn btn-secondary">')
+		//.appendLine('                  <span class="fa fa-reply-all" />')
+		//.appendLine('          </button>')
+		//
+		//.appendLine(' &nbsp;&nbsp; ')
+		//		
+		//.appendLine('			<button type="submit"  ')
+		////.appendLine('                  onclick="itemSave();" ')
+		//.appendLine('                  data-toggle="tooltip" data-placement="top" title="Guardar" ')
+		//.appendLine('                  class="btn btn-secondary">')
+		//.appendLine('                  <span class="fa fa-save" />')
+		//.appendLine('          </button>')
+		
+		.appendLine('		</div>')
+		.appendLine('	</div>')
+		
+		.appendLine('<div class="row">')
+		.appendLine('  <div class="col-3 col-sm-12 col-md-3 col-lg-3 col-xl-3">')
+		.appendLine('    <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">')
+		.appendLine('      <a class="nav-link active" id="v-pills-aplicacion-tab" data-toggle="pill" href="#v-pills-aplicacion" role="tab" aria-controls="v-pills-aplicacion" aria-selected="true">Aplicacion</a>')
+		//.appendLine('      <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">Home</a>')
+		//.appendLine('      <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="false">Profile</a>')
+		//.appendLine('      <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages" role="tab" aria-controls="v-pills-messages" aria-selected="false">Messages</a>')
+		//.appendLine('      <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</a>')
+		.append(l_grupos)
+		.appendLine('    </div>')
+		.appendLine('  </div>')
+		.appendLine('  <div class="col-9 col-sm-12 col-md-9 col-lg-9 col-xl-9">')
+		.appendLine('    <div class="tab-content" id="v-pills-tabContent">')
+		.appendLine('      <div class="tab-pane fade show active" id="v-pills-aplicacion" role="tabpanel" aria-labelledby="v-pills-aplicacion-tab">')
+		.appendLine('			<button type="button" ')
+		.appendLine('			onclick="location.href=&#39;/sys/resetpass&#39;" ')
+		.appendLine('			data-toggle="tooltip" data-placement="bottom" title="Password" ')
+		.appendLine('			class="btn btn-secondary" style="width: 10rem; margin: 15px;" >')
+		.appendLine('			<span class="fa fa-key fa-5x text-black-50"  aria-hidden="true" /><hr>')
+		.appendLine('			<h6 class="text-muted" style="font-family:&#39;Century Gothic&#39;, Arial">Cambiar Clave</h6>')
+		.appendLine('			</button>')
+		//.appendLine('			<button type="button" ')
+		//.appendLine('			onclick="location.href=&#39;/sys/logout&#39;" ')
+		//.appendLine('			data-toggle="tooltip" data-placement="bottom" title="Password" ')
+		//.appendLine('			class="btn btn-secondary" style="width: 10rem; margin: 15px;" >')
+		//.appendLine('			<span class="fa fa-key fa-5x text-black-50"  aria-hidden="true" /><hr>')
+		//.appendLine('			<h6 class="text-muted" style="font-family:&#39;Century Gothic&#39;, Arial">Nueva Clave</h6>')
+		//.appendLine('			</button>')
+		.appendLine('			<button type="button" ')
+		.appendLine('			onclick="location.href=&#39;/sys/logout&#39;" ')
+		.appendLine('			data-toggle="tooltip" data-placement="bottom" title="Sign Out" ')
+		.appendLine('			class="btn btn-secondary" style="width: 10rem; margin: 15px;" >')
+		.appendLine('			<span class="fa fa-sign-out fa-5x text-black-50"  aria-hidden="true" /><hr>')
+		.appendLine('			<h6 class="text-muted" style="font-family:&#39;Century Gothic&#39;, Arial">Salir</h6>')
+		.appendLine('			</button>')
+		.appendLine('      </div>')
+		
+		
+		
+		//.appendLine('      <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">a...</div>')
+		//.appendLine('      <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">b...</div>')
+		//.appendLine('      <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">c...</div>')
+		//.appendLine('      <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">d...</div>')
+		.append(l_opciones)
+		.appendLine('    </div>')
+		.appendLine('  </div>')
+		.appendLine('</div>')
+
+		.appendLine('</div>')
+		
+		// Habilitar el Tooltips en los botones
+		
+		.appendLine('<script>')
+		.appendLine('$(function () {')
+		.appendLine('  $(\'[data-toggle="tooltip"]\').tooltip()')
+		.appendLine('});')
+		.appendLine('</script>')
+		
+		.appendLine('');
+		
+	exports.GetHTMLsys(block, a_resp);
+}
+
+exports.showLogin = function(req, resp, err)
+{
+    if (settings.servConfig.debug){console.log("Procesando HttpMsgs showLogin");}
+
+	var l_block = new StringBuilder({ newline: '\r\n\t' });
+
+	switch(req.method.toUpperCase())
+	{
+		case "GET":
+			l_block.append('\t')
+			
+			.appendLine('<div class="container body-content">')
+			.appendLine('<br><h1>Login</h1><hr>')
+		
+			.appendLine('<form class="form-signin animated zoomIn" action="/sys/login" method="post" enctype="application/x-www-form-urlencoded" autocomplete="off">')
+			.appendLine('<fieldset>')
+			.appendLine('  <div class="text-center mb-4">')
+			//.appendLine('    <img class="mb-4" src="/img/logo_asociacion.png" alt="Asociacion Alzheimer El Salvador" width="32" height="32">')
+			//.appendLine('    <img class="mb-4" src="/img/logo_asociacion.png" alt="Asociacion Alzheimer El Salvador" height="100" >')
+			.appendLine('    <span class="navbar-brand mb-0 h1"><img src="/img/avatar.png" width="25" height="25" class="d-inline-block align-top" alt="">Alzheimer<span class="badge badge-pill badge-secondary">El Salvador</span></span>')
+			.appendLine('    <p>Ingreso de Usuario</p>')
+			.appendLine('  </div>')
+			.appendLine('')
+			.appendLine('  <div class="form-label-group">')
+			.appendLine('    <input type="email" id="inputEmail" name="inputEmail" class="form-control" placeholder="Email es Requerido" required autofocus>')
+			.appendLine('    <label for="inputEmail">Email address</label>')
+			.appendLine('  </div>')
+			.appendLine('')
+			.appendLine('  <div class="form-label-group">')
+			.appendLine('    <input type="password" id="inputPassword" name="inputPassword" class="form-control" placeholder="Password" required>')
+			.appendLine('    <label for="inputPassword">Password</label>')
+			.appendLine('  </div>')
+			.appendLine('')
+			//.appendLine('		<label class="custom-control-label" ><a href="/register">¿No posee una Cuenta?, Registrate</a></label>')
+			//.appendLine('		<label class="custom-control-label" ><a href="/recover_account">¿Olvidaste tu Usuario o Password?, Recuperar Cuenta</a></label>')
+			.appendLine('<br>')
+			.appendLine('  <button class="btn btn-lg btn-primary btn-block" type="submit">Ingresa</button>')
+			.appendLine('  <p class="mt-5 mb-3 text-muted text-center">&copy; 2018</p>')
+			.appendLine('</fieldset>')
+			.appendLine('</form>')
+			
+			.appendLine('</div>')
+			
+			.appendLine('');
+		break;
+		
+		case "POST":
+			l_block.append('\t')
+			.appendLine('<div class="container body-content">')
+			.appendLine('<br><h1>Login</h1><hr>')
+
+			.appendLine('<form class="form-signin animated zoomIn" action="/sys/login" method="post" enctype="application/x-www-form-urlencoded" autocomplete="off">')
+			.appendLine('<fieldset>')
+			.appendLine('  <div class="text-center mb-4">')
+			//.appendLine('    <img class="mb-4" src="/img/logo_asociacion.png" alt="Asociacion Alzheimer El Salvador" width="32" height="32">')
+			//.appendLine('    <img class="mb-4" src="/img/logo_asociacion.png" alt="Asociacion Alzheimer El Salvador" height="100" >')
+			.appendLine('    <span class="navbar-brand mb-0 h1"><img src="/img/avatar.png" width="25" height="25" class="d-inline-block align-top" alt="">Alzheimer<span class="badge badge-pill badge-secondary">El Salvador</span></span>')
+			.appendLine('    <p>Ingreso de Usuario</p>')
+			.appendLine('  </div>')
+			.appendLine('')
+			.appendLine('  <div class="form-label-group">')
+			.appendLine('    <input type="email" id="inputEmail" name="inputEmail" class="form-control" placeholder="Email es Requerido" required autofocus>')
+			.appendLine('    <label for="inputEmail">Email address</label>')
+			.appendLine('  </div>')
+			.appendLine('')
+			.appendLine('  <div class="form-label-group">')
+			.appendLine('    <input type="password" id="inputPassword" name="inputPassword" class="form-control" placeholder="Password" required>')
+			.appendLine('    <label for="inputPassword">Password</label>')
+			.appendLine('  </div>')
+			.appendLine('')
+			//.appendLine('		<label class="custom-control-label" ><a href="/register">¿No posee una Cuenta?, Registrate</a></label>')
+			//.appendLine('		<label class="custom-control-label" ><a href="/recover_account">¿Olvidaste tu Usuario o Password?, Recuperar Cuenta</a></label>')
+			.appendLine('<br>')
+			.appendLine('  <button class="btn btn-lg btn-primary btn-block" type="submit">Ingresa</button>')
+			.appendLine('  <p class="mt-5 mb-3 text-muted text-center">&copy; 2018</p>')
+			.appendLine('</fieldset>')
+			.appendLine('</form>')
+			
+			.appendLine('</div>')	
+
+			.appendLine('<script>')	
+			.appendLine('$(document).ready(function() {')
+			.appendLine('	swal(')
+			.appendLine('		  	{')
+			.appendLine('		  	title: "Crecenciales Rechazadas", ')
+			.appendLine('		  	text: "Sus credenciales no son validas, favor revisar", ')
+			.appendLine('		  	icon: "warning", ')
+			.appendLine('			buttons: false,')
+			.appendLine('			timer: 4000 ')
+			.appendLine('			});')
+			.appendLine('});')
+			.appendLine('</script>')
+			
+			.appendLine('');
+		break;
+	}
+		
+	exports.GetHTMLsys(l_block, resp);
+
+}	// showLogin
+
+
+exports.Mtto_resetpass = function(a_req, a_resp, a_data, a_metadata)
+{
+	if (settings.servConfig.debug){console.log("Procesando HttpMsgs Mtto_resetpass");}
+
+	var block = new StringBuilder({ newline: '\r\n\t' });
+	var l_remote_check = [];
+
+	block.append('\t')
+		.appendLine('')
+		.appendLine('<div class="container body-content">')
+		.appendLine('<br><h1>Cambiar mi Password</h1><hr>')
+		.appendLine('<form id="FormDinamic" autocomplete="off">')
+		.appendLine('	<div class="row">')
+		.appendLine('		<div class="col-md-3 col-sm-12">')
+		
+		.appendLine('			<button type="button"  ')
+		.appendLine('                  onclick="location.href=&#39;/sys/panel&#39;" ')
+		.appendLine('                  data-toggle="tooltip" data-placement="top" title="Panel de opciones" ')
+		.appendLine('                  class="btn btn-secondary">')
+		.appendLine('                  <span class="fa fa-home" />')
+		.appendLine('          </button>')	
+		
+		.appendLine(' &nbsp;&nbsp; ')
+				
+		.appendLine('			<button type="submit"  ')
+		//.appendLine('                  onclick="itemSave();" ')
+		.appendLine('                  data-toggle="tooltip" data-placement="top" title="Guardar" ')
+		.appendLine('                  class="btn btn-secondary">')
+		.appendLine('                  <span class="fa fa-save" />')
+		.appendLine('          </button>')
+		.appendLine('			<button id="bReset" type="reset"  ')
+		//.appendLine('                  onclick="itemSave();" ')
+		.appendLine('                  data-toggle="tooltip" data-placement="top" title="Limpiar Formulario" ')
+		.appendLine('                  class="btn btn-secondary">')
+		.appendLine('                  <span class="fa fa-ban" />')
+		.appendLine('          </button>')
+		
+		.appendLine('		</div>')
+		.appendLine('	</div>')
+		
+		//.appendLine('<div>key :' + a_metadata.primary_key.toString() + '</div>');
+		
+		//for (var j=0; j< a_metadata.columns.length; j++)
+		//{
+		var l_required = "<img src='/img/greendot.jpg' alt='' >";
+		var l_data_validetta = [];
+		var l_data_validettaF = "";
+		//	var l_placeholder = (a_metadata.columns[j].hasOwnProperty('placeholder')) ? "placeholder='" + a_metadata.columns[j].placeholder +"'":"";
+		//	var l_toUpperLowerCase = "";
+		//	
+		//	if (a_metadata.columns[j].required)
+
+        //
+		//	if (a_metadata.columns[j].hasOwnProperty('email_check'))
+		//	{ l_data_validetta.push("email"); }
+		//	
+		//	if (a_metadata.columns[j].hasOwnProperty('remote_check'))
+		//	{ 
+		//		l_data_validetta.push("remote[check_" + a_metadata.columns[j].col + "]");
+		//		l_remote_check.push('check_' + a_metadata.columns[j].col + ' : { type : "POST", url : "/api_remote/' + a_metadata.name + '", datatype : "json" }');
+		//	}
+		//	
+		
+		//	
+		//	if (a_metadata.columns[j].hasOwnProperty('toUpperLowerCase'))
+		//	{
+		//		if (a_metadata.columns[j].toUpperLowerCase)
+		//		{l_toUpperLowerCase = 'onkeyup="this.value = this.value.toUpperCase()"';}
+		//		else
+		//		{l_toUpperLowerCase = 'onkeyup="this.value = this.value.toLowerCase()"';}
+		//	}
+
+			block
+			.appendLine('<div class="form-group row" >')
+			.appendLine('	<label class="col-sm-12 col-md-3 col-form-label" for="correo">' + l_required + '&nbsp;&nbsp;&nbsp;Correo</label>')
+			.appendLine('	<div class="col-sm-12 col-md-9">');
+			
+			block.appendLine('		<input type="text" class="form-control" id="correo" name="input_correo" readonly="" value="' +a_metadata.correo +'">') 
+	
+			block
+			.appendLine('	</div>')
+			.appendLine('</div>');
+	
+		
+			l_data_validettaF = 'data-validetta="required,minLength[6],maxLength[50]"';
+			block
+			.appendLine('<div class="form-group row" >')
+			.appendLine('	<label class="col-sm-12 col-md-3 col-form-label" for="password">' + l_required + '&nbsp;&nbsp;&nbsp;Password</label>')
+			.appendLine('	<div class="col-sm-12 col-md-9">');
+			
+			block.appendLine('		<input type="password" class="form-control" id="password" name="password" size="50" placeholder="Password" maxlength="50" ' + l_data_validettaF + ' >') 
+	
+			block
+			.appendLine('	</div>')
+			.appendLine('</div>');
+			
+			
+			
+			l_data_validettaF = 'data-validetta="required,minLength[6],maxLength[50],different[password]"';
+			block
+			.appendLine('<div class="form-group row" >')
+			.appendLine('	<label class="col-sm-12 col-md-3 col-form-label" for="new_password">' + l_required + '&nbsp;&nbsp;&nbsp;Nuevo Password</label>')
+			.appendLine('	<div class="col-sm-12 col-md-9">');
+			
+			block.appendLine('		<input type="password" class="form-control" id="new_password" name="new_password" size="50" placeholder="Nuevo Password" maxlength="50" ' + l_data_validettaF + ' >') 
+	
+			block
+			.appendLine('	</div>')
+			.appendLine('</div>');
+			
+			
+			
+			l_data_validettaF = 'data-validetta="required,minLength[6],maxLength[50],equalTo[new_password]"';
+			block
+			.appendLine('<div class="form-group row" >')
+			.appendLine('	<label class="col-sm-12 col-md-3 col-form-label" for="repeat_password">' + l_required + '&nbsp;&nbsp;&nbsp;Confirme el Nuevo Password</label>')
+			.appendLine('	<div class="col-sm-12 col-md-9">');
+			
+			block.appendLine('		<input type="password" class="form-control" id="repeat_password" name="repeat_password" size="50" placeholder="Confirme Password" maxlength="50" ' + l_data_validettaF + ' >') 
+	
+			block
+			.appendLine('	</div>')
+			.appendLine('</div>');
+			
+		//}
+		
+		block
+		.appendLine('</form>')
+        //
+		.appendLine('<hr>')
+        //
+		.appendLine('<script type="text/javascript">')
+		
+		
+
+		block
+		.appendLine('function itemSave() ')
+		.appendLine('{')
+		.appendLine('var ITEM = {')
+		.appendLine('correo: "", ')
+		//.appendLine('nombres: "", ')
+		//.appendLine('apellidos: "", ')
+		.appendLine('password: "", ')
+		.appendLine('newpassword: "", ')
+		.appendLine('}')
+		.appendLine('	ITEM = new Object();')
+        //
+		.appendLine('		ITEM.correo = $("#correo").val();')
+		//.appendLine('		ITEM.nombres = $("#input_nombres").val();')
+		//.appendLine('		ITEM.apellidos = $("#input_apellidos").val();')
+		.appendLine('		ITEM.password = $("#password").val();')
+		.appendLine('		ITEM.newpassword = $("#new_password").val();')
+	
+		//block
+		.appendLine('	itemInsert("/api/resetpass", ITEM);')
+		.appendLine('	$("#bReset").click();')
+		.appendLine('}')
+        //
+		.appendLine('</script>')
+		.appendLine("<script src='/js/js_ctrlvalues.js' ></script>")
+		//
+		.appendLine('<script>')
+		.appendLine('$(document).ready(function() {')
+		.appendLine('	$("#FormDinamic").validetta(')
+		.appendLine('		{realTime: true,')
+		.appendLine('		display : "inline", // bubble or inline')
+		//.appendLine('		validators: {')
+		//.appendLine('			remote : {')
+		//// Ejemplo: check_iso3 : { type : "POST", url : "/api_remote/pais", datatype : "json" }
+		//.appendLine(l_remote_check.toString())
+		//.appendLine('			}')
+		//.appendLine('		},')
+
+		.appendLine('onValid : function( event ) ')
+		.appendLine('{ ')
+		.appendLine(' event.preventDefault(); // Evitará la presentación/envio del formulario')
+		.appendLine(' itemSave();')
+		.appendLine('},')
+		.appendLine('onError : function( event )')
+		.appendLine('{  ')
+		.appendLine('	swal(')
+		.appendLine('		  	{')
+		.appendLine('		  	title: "Registro NO Valido", ')
+		.appendLine('		  	text: "Los Valores NO pasaron las validaciones, favor revisar", ')
+		.appendLine('		  	icon: "warning", ')
+		.appendLine('			buttons: false,')
+		.appendLine('			timer: 4000 ')
+		.appendLine('			});')
+		.appendLine('}  ')
+		.appendLine('	});')
+		.appendLine(' ')
+		// Habilitar el Tooltips en los botones
+		.appendLine('$(function () {')
+		.appendLine('  $(\'[data-toggle="tooltip"]\').tooltip()')
+		.appendLine('});')
+		
+		.appendLine('});')
+		.appendLine('</script>')
+	
+		.appendLine('</div>')
+		.appendLine('');
+	
+	exports.GetHTMLsys(block, a_resp);
+} // Mtto_resetpass
+
+GetPrimaryKey = function (a_entity)
+{
+	// Recibe la entidad a la cual se le desea calcula la Primary Key
+	// Devuelve una cadena conteniendo la estructura de la PK
+
+	if (settings.servConfig.debug){console.log("Procesando HttpMsgs GetPrimaryKey");}
+	
+	var l_pk = [];
+	for (var i = 0; i< a_entity.primary_key.length; i++)
+	{ for (var j = 0; j< a_entity.columns.length; j++)
+		{ 
+			if ( a_entity.columns[j].col === a_entity.primary_key[i])
+			{ l_pk.push('table.row(".selected").data()[' + j + ']' );}
+		}
+	}
+	
+	return (l_pk);
+}
 

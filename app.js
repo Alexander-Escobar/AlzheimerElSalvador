@@ -1,9 +1,24 @@
+// Generales
 var http = require('http');
-var httpMsgs = require('./js/httpmsgs');
-var settings = require('./js/settings');
-var Manager = require('./controller/manager');
 var fs = require('fs'); //fileSystem
 var qs = require('querystring');
+
+// Entorno de Trabajo
+var httpMsgs = require('./js/httpmsgs');
+var settings = require('./js/settings');
+
+// Administracion
+var Manager = require('./controller/manager');
+
+// Sistema / Seguridad / Administracion
+var Manager_Sys = require('./controller/mngr_sys');
+var dbModel = require('./js/dbmodel');
+var Manager_Api = require('./controller/mngr_api');
+
+// Session
+var url = require("url");
+var SessionHandler = require('./js/sessionhandler.js').SessionHandler;
+var sessionHandler = new SessionHandler();
 
 ParsePath = function (a_req)
 {
@@ -52,7 +67,23 @@ var server = http.createServer(function (req, resp)
 				//case "boletin":		// Pagina del Boletin
 				//	Manager.GetBoletin(req, resp);
 				//break;
-                //
+				
+				case "boletin":
+					if (l_path.length == 2)
+					{Manager.GetBoletin(req, resp);}
+					else
+					{
+						var l_userPath = '[a-zA-Z0-9._-]+';
+						var path = new RegExp("/boletin/"+l_userPath);
+						if (path.test(req.url))
+						{
+							Manager.GetPublicacion(l_path[2], req, resp);
+						}
+						else
+						{httpMsgs.show404(req, resp);}
+					}
+					break;	// "/boletin"
+				
 				//case "evento":		// Pagina del Boletin
 				//	Manager.GetBoletin(req, resp);
 				//break;
@@ -80,6 +111,118 @@ var server = http.createServer(function (req, resp)
 				//case "sitemap.xml":	// sitemap.xml
 				//	Manager.GetSiteMap(req, resp);
 				//	break;
+
+				// SYS
+				case "sys":
+				
+				    var l_query = url.parse(req.url, true).query;
+					var l_session = sessionHandler.getSession(req, resp);
+					
+					console.log(req.url)
+					console.log(l_session);
+					console.log(l_session.name)
+					console.log(l_query.name)
+				
+					if (!l_session.name && l_query.name)
+					{ l_session.name = l_query.name; }
+					
+					if (l_session.name)
+					{ 
+						// Start - Sesion Valida
+						var l_userPath = '[a-zA-Z0-9._-]+';
+						var path = new RegExp("/sys/"+l_userPath);
+						var l_opc = "";
+						if (path.test(req.url))
+						{
+							switch(req.url)
+							{
+								case '/sys/panel':
+									Manager_Sys.getPanel(req, resp, l_session.perfil);
+								break;
+							
+								case '/sys/logout':
+									delete l_session.name;
+									delete l_session.perfil;
+									Manager.GetHome(req, resp);
+								break;
+								
+								case '/sys/resetpass':
+									Manager_Sys.getMttoRP(req, resp, l_session);
+								break;
+								
+								default:
+									for (var i=0; i < dbModel.models.tables.length; i++)
+									{
+										l_opc = dbModel.models.tables[i].name;
+										
+										//console.log('sys default');
+										//console.log(l_opc);
+										//console.log(l_path[2]);
+										
+										if (l_opc === l_path[2])
+										{ Manager_Sys.getMtto(req, resp, l_opc); }
+										
+										if (l_path[2].endsWith("_new") && l_opc === l_path[2].substring(0, l_path[2].length - 4))
+										{ Manager_Sys.getMtto_new(req, resp, l_opc); }
+										
+										if (l_path[2].endsWith("_edit") && l_opc === l_path[2].substring(0, l_path[2].length - 5))
+										{ Manager_Sys.getMtto_edit(req, resp, l_opc, l_path[3]); }
+									}
+								break;
+							}
+							
+							
+							
+							
+							//if (req.url === '/sys/panel')
+							//{
+							//	Manager_Sys.getPanel(req, resp, l_session.name);
+							//}
+							//else
+							//{
+							//	if (req.url === '/sys/logout')
+							//	{
+							//		delete l_session.name;
+							//		Manager.GetHome(req, resp);
+							//	}
+							//	for (var i=0; i < dbModel.models.tables.length; i++)
+							//	{
+							//		l_opc = dbModel.models.tables[i].name;
+							//		
+							//		if (l_opc === l_path[2])
+							//		{ Manager_Sys.getMtto(req, resp, l_opc); }
+							//		
+							//		if (l_path[2].endsWith("_new") && l_opc === l_path[2].substring(0, l_path[2].length - 4))
+							//		{ Manager_Sys.getMtto_new(req, resp, l_opc); }
+							//		
+							//		if (l_path[2].endsWith("_edit") && l_opc === l_path[2].substring(0, l_path[2].length - 5))
+							//		{ Manager_Sys.getMtto_edit(req, resp, l_opc, l_path[3]); }
+							//	}
+							//}
+						}
+						else
+						{httpMsgs.show404(req, resp);}
+					
+						// End - Sesion Valida
+					}
+					else	// Sesion NO Autenticada
+					{ Manager_Sys.getLogin(req, resp, l_session); }
+						
+
+					break;	//  "sys"
+				
+				
+
+				
+
+				
+				
+				case "api":
+					if (req.url === '/api/categoria') 
+					{
+						Manager_Sys.getCategoriaList(req, resp);
+					}
+					break;
 				
 				case "favicon.ico":
 					// Icon format	image/x-icon
@@ -149,7 +292,10 @@ var server = http.createServer(function (req, resp)
 							break;
 						
 						case "peg":	// JPEG images (.jpeg / .jpg)
-						case "jpg":
+							httpMsgs.showResource(req, resp, "/" + l_path[1] + "/", ".jpeg", l_path[2], "image/jpeg", "utf-8");
+							break;
+							
+						case "jpg": // JPEG images (.jpeg / .jpg)
 							httpMsgs.showResource(req, resp, "/" + l_path[1] + "/", ".jpg", l_path[2], "image/jpeg", "utf-8");
 							break;
 						
@@ -195,13 +341,50 @@ var server = http.createServer(function (req, resp)
 				//	Manager.GetHomeSearch(req, resp);
 				//break;
 
-				//case "login":
-				//	Manager.GetLogin(req, resp);
-				//break;
-				//
+				case "sys":
+					if (req.url === '/sys/login') 
+					{
+						var l_session2 = sessionHandler.getSession(req, resp);
+						Manager_Sys.getLogin(req, resp, l_session2);
+					}
+				break;
+				
 				//case "register":
 				//	Manager.GetRegister(req, resp);
 				//break;
+				
+				case "api_remote":		// Api Remote Check
+					Manager_Api.remote_check(req, resp, l_path[2]);
+				break;
+				
+				case "api_ddl":		// Api Drop Down List
+					//Manager_Sys.getCategoriaList(req, resp);
+					Manager_Api.drop_down_list(req, resp, l_path[2]);
+				break;
+				
+				case "api_resetpass":	// Api Reset Password
+					Manager_Api.customMtto(req, resp, l_path[2]);
+				break;
+				
+				// api
+				case "api":
+					var l_userPath = '[a-zA-Z0-9._-]+';
+					var path = new RegExp("/api/"+l_userPath);
+//					if (path.test(req.url))
+//					{
+//						for (var i=0; i < dbModel.models.tables.length; i++)
+//						{
+//							if (dbModel.models.tables[i].name === l_path[2])
+//							{
+//								//path = new RegExp("/api/"+l_path[2]+"/"+l_userPath);
+								Manager_Api.postMtto(req, resp, l_path[2]);
+//							}
+//						}
+//					}
+//					else
+//					{httpMsgs.show405(req, resp);}
+					//httpMsgs.send200(req, resp);
+				break;
 					
 				default:
 					console.log('POST default:'+req.url);
@@ -223,6 +406,26 @@ var server = http.createServer(function (req, resp)
 				//	Manager.GetHomeSearch(req, resp);
 				//break;
 
+				// api
+				case "api":
+					var l_userPath = '[a-zA-Z0-9._-]+';
+					var path = new RegExp("/api/"+l_userPath);
+//					if (path.test(req.url))
+//					{
+//						for (var i=0; i < dbModel.models.tables.length; i++)
+//						{
+//							if (dbModel.models.tables[i].name === l_path[2])
+//							{
+//								//path = new RegExp("/api/"+l_path[2]+"/"+l_userPath);
+								Manager_Api.putMtto(req, resp, l_path[2]);
+//							}
+//						}
+//					}
+//					else
+//					{httpMsgs.show405(req, resp);}
+					//httpMsgs.send200(req, resp);
+				break;
+				
 				default:
 					console.log('PUT default:'+req.url);
 					httpMsgs.show404(req, resp);
@@ -248,6 +451,27 @@ var server = http.createServer(function (req, resp)
 				//case "root":
 				//	Manager.GetHomeSearch(req, resp);
 				//break;
+				
+				// api
+				case "api":
+					var l_userPath = '[a-zA-Z0-9._-]+';
+					var path = new RegExp("/api/"+l_userPath);
+					if (path.test(req.url))
+					{
+						for (var i=0; i < dbModel.models.tables.length; i++)
+						{
+							if (dbModel.models.tables[i].name === l_path[2])
+							{
+//								//path = new RegExp("/api/"+l_path[2]+"/"+l_userPath);
+								Manager_Api.deleteMtto(req, resp, l_path[2], l_path[3]);
+							}
+						}
+					}
+//					else
+//					{httpMsgs.show405(req, resp);}
+					//httpMsgs.send200(req, resp);
+				break;
+
 
 				default:
 					console.log('DELETE default:'+req.url);

@@ -17,7 +17,19 @@ exports.GetHome = function (a_req, a_resp)
 
 exports.GetBoletin = function (a_req, a_resp)
 {
-    db.executeSQL("SELECT * FROM publicacion ORDER BY publicado DESC ", function(data, err)
+	var l_sql = " SELECT P.id, " +
+					" P.titulo, " +
+					" P.subtitulo, " +
+					" DATE_FORMAT(P.publicado, '%M %d, %Y') as publicado, " +
+					" P.autor, " +
+					" P.introduccion, " +
+					" P.tags, " +
+					" P.url_imagen " +
+				" FROM publicacion P " +
+				" ORDER BY P.publicado DESC " +
+				" LIMIT 10 ";
+
+    db.executeSQL(l_sql, function(data, err)
     {
         if (err)
         {httpMsgs.show500(a_req, a_resp, err);}
@@ -39,11 +51,16 @@ exports.GetStaticPage = function (a_page, a_req, a_resp)
 
 exports.GetPublicacion = function (a_filter, a_req, a_resp)
 {
-	var l_sql = "SELECT P.id, " +
+	var l_sql = " SELECT P.id, " +
 					" P.titulo, " +
-					" P.publicado, " +
+					" P.subtitulo, " +
+					" DATE_FORMAT(P.publicado, '%M %d, %Y') as publicado, " +
+					" P.autor, " +
 					" P.introduccion, " +
-					" P.contenido " +
+					" P.tags, " +
+					" P.contenido, " +
+					" P.url_imagen, " +
+					" (SELECT max(X.id) FROM publicacion X) as ult_id " +
 					" FROM publicacion P " +
 					" WHERE id = " + a_filter ;
 

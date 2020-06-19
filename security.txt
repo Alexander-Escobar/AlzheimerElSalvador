@@ -1,6 +1,6 @@
 # https://securitytxt.org/
 # /.well-known/ path (/.well-known/security.txt) [RFC5785].
-Contact: Asociacion@AlzheimerElSalvador.Org
+Contact: asociacion@AlzheimerElSalvador.Org
 Contact: https://www.facebook.com/Alzheimer-El-Salvador-256581527700226/
 Policy: http://AlzheimerElSalvador.Org/politica
 Hiring: http://AlzheimerElSalvador.Org/politica

@@ -2,7 +2,7 @@
   "name": "alzheimer",
   "version": "1.0.0",
   "description": "Asociacion Alzheimer El Salvador, sin fines de lucro",
-  "main": "app.js",
+  "main": "TestUpFiles.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,7 +14,9 @@
   "author": "Vuxmi.com | Alexander.Enrique.Escobar@gmail.com",
   "license": "ISC",
   "dependencies": {
-    "mysql": "^2.16.0",
+    "formidable": "^1.2.1",
+    "mysql": "^2.15.0",
+    "nodemailer": "^6.3.0",
     "stringbuilder": "0.0.11"
   }
 }

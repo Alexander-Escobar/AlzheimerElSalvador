@@ -1,0 +1,183 @@
+
+h1
+{
+	font-family: "Arial Black";
+	font-size:50px;
+	text-align: center;
+	text-shadow: 3px 3px #17202A;
+}
+
+h3
+{
+	font-family: "Arial";
+	font-size:25px;
+	text-align: center;
+}
+
+.boletin-post-date
+{
+	font-size:12px;
+	color:#D0D3D4;
+}
+
+.boletin-autor
+{
+	font-size:14px;
+	text-align: right;
+	text-shadow: 1px 1px #17202A;
+}
+
+.boletin-tags
+{
+	font-size:14px;
+	text-align: right;
+	text-shadow: 1px 1px #17202A;
+}
+
+.boletin-avatar
+{
+	border-radius: 50%;
+	width: 40px;
+}
+
+p
+{
+	font-family:Segoe UI;
+	letter-spacing: 1px;
+	text-align: justify;
+	color: #F7F9F9;
+	text-shadow: 1px 1px #566573;
+}
+
+.button-scrolltop
+{
+	display: none; 		/* Hidden by default */
+    position: fixed;	/* Fixed/sticky position */
+    bottom: 20px;		/* Place the button at the bottom of the page */
+    right: 30px;		/* Place the button 30px from the right */
+    z-index: 99;		/* Make sure it does not overlap */
+}
+
+.button-scrolltop:hover 
+{
+    /* background-color: #555; */ /* Add a dark-grey background on hover */ 
+}
+
+.boletin-image 
+{
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+    border: 1px solid #ddd; /* Gray border */
+    border-radius: 12px;  /* Rounded border */
+    padding: 5px; /* Some padding */
+    width: 60%; /* Set a small width */
+}
+
+/* Add a hover effect (blue shadow) */
+.boletin-image:hover 
+{
+    box-shadow: 0 0 3px 2px rgba(0, 140, 186, 0.5);
+}
+
+.boletin-hr
+{
+	/* color: #D0D3D4; */
+	background-color: #D0D3D4;
+	width: 60%;
+}
+
+body
+{
+	margin: 1% 10% 10% 4% ;
+	font-family:Segoe UI, proxima nova, Abdo Master Bandar, Helvetica, Geeza Pro, Arial, sans-serif;
+	-webkit-font-kerning:normal;
+	font-kerning:normal;
+	-webkit-font-variant-ligatures:common-ligatures contextual;
+	font-variant-ligatures:common-ligatures contextual;
+	-webkit-font-feature-settings:"kern","liga","clig","calt";
+	font-feature-settings:"kern","liga","clig","calt";
+	font-weight:400;
+	font-size:18.5px;
+	/* line-height:1.623em; */
+	/* color:#000; */
+	/* color:#0f0f0f; */
+	/* color:#393939; */
+	color: white;
+	-webkit-tap-highlight-color:rgba(0,0,0,0);
+	-webkit-font-smoothing:antialiased;
+	-moz-osx-font-smoothing:grayscale;
+	cursor:default;
+	outline:none;
+	background-position:50% 0;
+	background-attachment:fixed;
+	background-size:cover;
+	background-repeat:no-repeat;
+	background-color:#959595;
+}
+
+.bf-loaded body
+{
+	font-family:proxima nova,Abdo Master Bandar,Helvetica,Geeza Pro,Arial,sans-serif;
+}
+
+body:before
+{
+	content:"";
+	position:fixed;
+	will-change:opacity;
+	top:0;
+	right:0;
+	height:100vh;
+	width:100vw;
+	background-size:cover;
+	background-position:50%;
+	opacity:0;
+	-webkit-animation:bg-fade-in 10s cubic-bezier(.45,0,.09,1) forwards 1s;
+	animation:bg-fade-in 10s cubic-bezier(.45,0,.09,1) forwards 1;
+	-webkit-transform:scale(1);
+	transform:scale(1);
+	z-index:-2;
+	zoom:reset;
+	background-image: url("/img/default-bg.jpeg");
+}
+
+@keyframes bg-fade-in 
+{
+    from {
+        opacity:0;
+	}
+    to {
+        opacity:1;
+	}
+}
+
+@-moz-keyframes bg-fade-in /* Firefox */
+{
+    from {
+        opacity:0;
+	}
+    to {
+		opacity:1;
+	}
+}
+
+@-webkit-keyframes bg-fade-in /* Safari and Chrome */
+{
+    from {
+		opacity:0;
+	}
+    to {
+		opacity:1;
+	}
+}
+
+@-o-keyframes bg-fade-in /* Opera */
+{
+    from {
+		opacity:0;
+	}
+    to {
+		opacity: 1;
+	}
+}	
