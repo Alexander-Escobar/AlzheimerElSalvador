@@ -622,7 +622,7 @@ exports.showResource = function(a_req, a_resp, a_route, a_ext, a_file, a_content
 		var l_userPath = '[a-zA-Z0-9._-]+';
 		var l_path = new RegExp( a_route + l_userPath + a_ext);
 		
-		if (l_path.test(a_req.url))
+		if (l_path.test("." + a_route + a_file)) //a_req.url
 		{
 			if (fs.existsSync("." + a_route + a_file))
 			{
@@ -1607,8 +1607,14 @@ exports.MttoList = function(a_req, a_resp, a_data, a_metadata)
 			l_toolbarPlus = '&nbsp;&nbsp; ';
 			for (var xy=0; xy < a_metadata.toolbar.length; xy++)
 			{
-				l_toolbarPlus += '<button id="' + a_metadata.toolbar[xy].button + '" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="' + a_metadata.toolbar[xy].title + '" ><span class="' + a_metadata.toolbar[xy].icon + '" /></button>';
-				//{button: "ButtonReset", title: "Resetear Password", icon: "fa fa-file-powerpoint-o", URL: "api_resetpass"}]
+				//if ( a_metadata.toolbar[xy].verbo == "GET")
+				//{
+				//	l_toolbarPlus += '<button type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="' + a_metadata.toolbar[xy].title + '"  onclick=" window.open(&#39;' + a_metadata.toolbar[xy].URL + '&#39;, &#39;_blank&#39;); return false;" ><span class="' + a_metadata.toolbar[xy].icon + '" /></button>';
+				//}
+				//else
+				//{
+					l_toolbarPlus += '<button id="' + a_metadata.toolbar[xy].button + '" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="' + a_metadata.toolbar[xy].title + '" ><span class="' + a_metadata.toolbar[xy].icon + '" /></button>';
+				//}
 			}
 		}
 
@@ -1710,60 +1716,79 @@ exports.MttoList = function(a_req, a_resp, a_data, a_metadata)
 		{
 			for (var yx=0; yx < a_metadata.toolbar.length; yx++)
 			{
-				//a_metadata.toolbar[xy].button 
-				//' + a_metadata.toolbar[xy].title + '
-				//' + a_metadata.toolbar[xy].icon + '
-		
-				l_block
-				.appendLine('	$("#' + a_metadata.toolbar[yx].button + '").click( function () {')
-				.appendLine('		try {')
-				.appendLine('			var l_RecursoURL = "' + a_metadata.toolbar[yx].URL + '";  ')
-				.appendLine('			var l_Item = ' + GetPrimaryKey(a_metadata).join(" + '-' + ") + '; ')
-				.appendLine('		}')
-				.appendLine('		catch(err) {')
-				.appendLine('			swal({title: "Click en una fila para seleccionar", text: "Operacion Cancelada", icon:"error", buttons: false, timer:3000});')
-				.appendLine('			return;')
-				.appendLine('		}')
-				.appendLine('	swal')
-				.appendLine('	({')
-				.appendLine('	  title: "¿Desea ' + a_metadata.toolbar[yx].title + ' al Registro?",')
-				.appendLine('	  text: "Una vez ' + a_metadata.toolbar[yx].title + ', No podra ser Recuperado",')
-				.appendLine('	  icon: "warning",')
-				.appendLine('	  buttons: true,')
-				.appendLine('	  dangerMode: true,')
-				.appendLine('	})')
-				.appendLine('	.then((willDelete) => {')
-				.appendLine('	  if (willDelete) ')
-				.appendLine('	  {')
-				.appendLine(' ')
-				.appendLine('		// Call Web API to get a list of Product')
-				.appendLine('		$.ajax({')
-				.appendLine('			url: l_RecursoURL+"/"+l_Item,')
-				.appendLine('			type: "' + a_metadata.toolbar[yx].verbo + '",')
-				.appendLine('		success: function (respuesta)')
-				.appendLine('		{')
-				//.appendLine('        	table.row(".selected").remove().draw( false );')
-				.appendLine('		  	swal(')
-				.appendLine('		  	{')
-				.appendLine('		  	title: "Al Registro se le realizo ' + a_metadata.toolbar[yx].title + '", ')
-				.appendLine('		  	text: "Id de registro "+l_Item, ')
-				.appendLine('		  	icon: "success", ')
-				.appendLine('			buttons: false,')
-				.appendLine('			timer: 3000 ')
-				.appendLine('			});},')
-				.appendLine('		error: function (request, message, error)')
-				.appendLine('		{ handleException(request, message, error);}')
-				.appendLine('		   ')
-				.appendLine('		 }); ')
-				.appendLine(' ')
-				.appendLine('	  } else ')
-				.appendLine('	  {')
-				.appendLine('		swal({title: "Operacion Cancelada", text: "Id de registro "+l_Item, icon:"error", buttons: false, timer:3000});')
-				.appendLine('	  }')
-				.appendLine('	});')
-				.appendLine('					')
-				.appendLine('    } );')
-				.appendLine('// fin Custom Button ')
+				if ( a_metadata.toolbar[yx].verbo == "GET")
+				{
+					l_block
+					.appendLine('	$("#' + a_metadata.toolbar[yx].button + '").click( function () {')
+					.appendLine('		try {')
+					.appendLine('			var l_RecursoURL = "' + a_metadata.toolbar[yx].URL + '";  ')
+					.appendLine('			var l_Item = ' + GetPrimaryKey(a_metadata).join(" + '-' + ") + '; ')
+					.appendLine('		}')
+					.appendLine('		catch(err) {')
+					.appendLine('			swal({title: "Click en una fila para seleccionar", text: "Operacion Cancelada", icon:"error", buttons: false, timer:3000});')
+					.appendLine('			return;')
+					.appendLine('		}')
+					
+					.appendLine('       window.open(l_RecursoURL+"/"+l_Item, "_blank"); ')
+					//.appendLine('       window.open("' + a_metadata.toolbar[yx].URL + '", "_blank"); ')
+					
+					.appendLine('					')
+					.appendLine('    } );')
+					.appendLine('// fin Custom Button ')
+				}
+				else
+				{
+					l_block
+					.appendLine('	$("#' + a_metadata.toolbar[yx].button + '").click( function () {')
+					.appendLine('		try {')
+					.appendLine('			var l_RecursoURL = "' + a_metadata.toolbar[yx].URL + '";  ')
+					.appendLine('			var l_Item = ' + GetPrimaryKey(a_metadata).join(" + '-' + ") + '; ')
+					.appendLine('		}')
+					.appendLine('		catch(err) {')
+					.appendLine('			swal({title: "Click en una fila para seleccionar", text: "Operacion Cancelada", icon:"error", buttons: false, timer:3000});')
+					.appendLine('			return;')
+					.appendLine('		}')
+					.appendLine('	swal')
+					.appendLine('	({')
+					.appendLine('	  title: "¿Desea ' + a_metadata.toolbar[yx].title + ' al Registro?",')
+					.appendLine('	  text: "Una vez ' + a_metadata.toolbar[yx].title + ', No podra ser Recuperado",')
+					.appendLine('	  icon: "warning",')
+					.appendLine('	  buttons: true,')
+					.appendLine('	  dangerMode: true,')
+					.appendLine('	})')
+					.appendLine('	.then((willDelete) => {')
+					.appendLine('	  if (willDelete) ')
+					.appendLine('	  {')
+					.appendLine(' ')
+					.appendLine('		// Call Web API to get a list of Product')
+					.appendLine('		$.ajax({')
+					.appendLine('			url: l_RecursoURL+"/"+l_Item,')
+					.appendLine('			type: "' + a_metadata.toolbar[yx].verbo + '",')
+					.appendLine('		success: function (respuesta)')
+					.appendLine('		{')
+					//.appendLine('        	table.row(".selected").remove().draw( false );')
+					.appendLine('		  	swal(')
+					.appendLine('		  	{')
+					.appendLine('		  	title: "Al Registro se le realizo ' + a_metadata.toolbar[yx].title + '", ')
+					.appendLine('		  	text: "Id de registro "+l_Item, ')
+					.appendLine('		  	icon: "success", ')
+					.appendLine('			buttons: false,')
+					.appendLine('			timer: 3000 ')
+					.appendLine('			});},')
+					.appendLine('		error: function (request, message, error)')
+					.appendLine('		{ handleException(request, message, error);}')
+					.appendLine('		   ')
+					.appendLine('		 }); ')
+					.appendLine(' ')
+					.appendLine('	  } else ')
+					.appendLine('	  {')
+					.appendLine('		swal({title: "Operacion Cancelada", text: "Id de registro "+l_Item, icon:"error", buttons: false, timer:3000});')
+					.appendLine('	  }')
+					.appendLine('	});')
+					.appendLine('					')
+					.appendLine('    } );')
+					.appendLine('// fin Custom Button ')
+				}
 		
 			}
 		}
@@ -1844,6 +1869,7 @@ exports.Mtto_new = function(a_req, a_resp, a_data, a_metadata)
 			var l_placeholder = (a_metadata.columns[j].hasOwnProperty('placeholder')) ? "placeholder='" + a_metadata.columns[j].placeholder +"'":"";
 			var l_toUpperLowerCase = "";
 			var l_pattern = "";
+			var l_ignoreNew = (a_metadata.columns[j].hasOwnProperty('ignoreNew')) ? a_metadata.columns[j].ignoreNew : false;
 			
 			if (a_metadata.columns[j].required)
 			{ l_data_validetta.push("required"); }
@@ -1881,6 +1907,8 @@ exports.Mtto_new = function(a_req, a_resp, a_data, a_metadata)
 			//.appendLine('	<label class="col-sm-2 col-form-label" >' + a_metadata.columns[j].type + ' ' + a_metadata.columns[j].length + '</label>')
 			.appendLine('	<div class="col-sm-12 col-md-9">');
 
+			if (!l_ignoreNew)
+			{
 			
 			switch (a_metadata.columns[j].type)
 			{
@@ -2007,6 +2035,15 @@ exports.Mtto_new = function(a_req, a_resp, a_data, a_metadata)
 					block.appendLine('		<input type="text" class="form-control" id="input_' + a_metadata.columns[j].col + '" name="' + a_metadata.columns[j].col + '" size="' + a_metadata.columns[j].length + '" ' + l_placeholder + ' maxlength="' + a_metadata.columns[j].length + '" ' + l_data_validettaF + ' ' + l_toUpperLowerCase + ' >')
 				break;
 			}
+			}
+			else
+			{
+				block.appendLine('		<div class="form-group">')
+	//			block.appendLine('		<label >AUTO GENERADO</label>')
+				block.appendLine('		<input type="text" class="form-control" placeholder="AUTO GENERADO" disabled>')
+				block.appendLine('		</div>')
+			}
+			
 			block
 			.appendLine('	</div>')
 			.appendLine('</div>');
@@ -2062,7 +2099,7 @@ exports.Mtto_new = function(a_req, a_resp, a_data, a_metadata)
 		{ block.appendLine('ITEM.' + a_metadata.columns[l].col + ' = $("#input_' + a_metadata.columns[l].col + '").val();'); }
 
 		block
-		.appendLine('	itemInsert("/api/' + a_metadata.table + '", ITEM);')
+		.appendLine('	itemInsert("/api/' + a_metadata.name + '", ITEM);')
 		.appendLine('	$("#bReset").click();')
 		.appendLine('}')
 
@@ -2393,7 +2430,7 @@ exports.Mtto_edit = function(a_req, a_resp, a_data, a_metadata)
 		{ block.appendLine('ITEM.' + a_metadata.columns[l].col + ' = $("#input_' + a_metadata.columns[l].col + '").val();'); }
 
 		block
-		.appendLine('itemUpdate("/api/' + a_metadata.table + '/' + a_data[0].id + '", ITEM);')
+		.appendLine('itemUpdate("/api/' + a_metadata.name + '/' + a_data[0].id + '", ITEM);')
 		.appendLine('')
 		.appendLine('}')
 
@@ -2451,6 +2488,8 @@ exports.Mtto_panel = function(a_req, a_resp, a_metadata)
 	
 	var l_grupos = "";
 	var l_opciones = "";
+	var l_target_button = "";
+	var l_disabled = "";
 
 	var block = new StringBuilder({ newline: '\r\n\t' });
 	var l_remote_check = [];
@@ -2461,10 +2500,20 @@ exports.Mtto_panel = function(a_req, a_resp, a_metadata)
 		l_opciones += '      <div class="tab-pane fade" id="v-pills-' + a_metadata.grupos[l].id + '" role="tabpanel" aria-labelledby="v-pills-' + a_metadata.grupos[l].id + '-tab"> \r\n\t';
 		for (var h=0; h< a_metadata.grupos[l].opciones.length; h++)
 		{
+			l_target_button = '';
+			//<button title="button title" class="action primary tocart" onclick=" window.open('http://www.google.com', '_blank'); return false;">Google</button>
+			//' onclick="location.href=&#39;' + a_metadata.grupos[l].opciones[h].url + '&#39;" ' +
+			
+			// Abrir en su propia ventana
+			l_target_button = (a_metadata.grupos[l].opciones[h].hasOwnProperty('target')) ? ' onclick=" window.open(&#39;' + a_metadata.grupos[l].opciones[h].url + '&#39;, &#39;_blank&#39;); return false;"':' onclick="location.href=&#39;' + a_metadata.grupos[l].opciones[h].url + '&#39;" ';
+			
+			// Disponible o no La opcion
+			l_disabled = (a_metadata.grupos[l].opciones[h].hasOwnProperty('disable')) ? 'disabled':'';
+			
 			l_opciones += 	'<button type="button" ' +
-							' onclick="location.href=&#39;' + a_metadata.grupos[l].opciones[h].url + '&#39;" ' +
-							' data-toggle="tooltip" data-placement="bottom" title="' + a_metadata.grupos[l].opciones[h].opcion + '" ' +
-							' class="btn btn-secondary" style="width: 10rem; margin: 15px;" >' +
+							l_target_button +
+							' data-toggle="tooltip" data-placement="bottom" title="' + a_metadata.grupos[l].opciones[h].tooltip + '" ' +
+							' class="btn btn-secondary" style="width: 10rem; margin: 15px;" ' + l_disabled + ' >' +
 							' <span class="' + a_metadata.grupos[l].opciones[h].icono + ' fa-5x text-black-50"  aria-hidden="true" /><hr>' +
 							' <h6 class="text-muted" style="font-family:&#39;Century Gothic&#39;, Arial">' + a_metadata.grupos[l].opciones[h].opcion + '</h6>' +
 							'</button> \r\n\t';

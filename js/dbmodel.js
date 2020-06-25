@@ -17,7 +17,7 @@ exports.models =
             {col: "leyenda",			type: "varchar",	length: 80,		minLength: 0, required: false,	visible: true,	searchable: false, label: "Leyenda",	placeholder: "Ingrese una Leyenda"},
             {col: "iso2",				type: "char",		length: 2,		minLength: 2, required: false,	visible: true,	searchable: true, label: "Nombre Corto (ISO 2)", toUpperLowerCase: true, allowNoEdit: true, remote_check: "SELECT count(1) as existe FROM pais WHERE iso2 = ? "}
          ]
-      },
+      },	  
       {
          name: "departamento",
 		 title: "Departamento / Ciudad",
@@ -120,6 +120,20 @@ exports.models =
          ]
       },
 	  {
+         name: "tipodoc",
+		 title: "Tipo Documento",
+		 table: "tipo_documento",
+         primary_key: ["id"],
+		 sql_select: " SELECT * FROM tipo_documento ",
+		 sql_edit: " SELECT * FROM tipo_documento WHERE id = ? ",
+		 sql_new: " SELECT * FROM tipo_documento ",
+		 sql_delete : " DELETE FROM tipo_documento WHERE id = ? ",
+         columns: [
+            {col: "id",					type: "int",		length: 5,		minLength: 1, required: true,	visible: true,	searchable: true, label: "Id", allowNoEdit: true, ignoreNew: true, step: 1, min:1, max: 999},
+			{col: "nombre",				type: "varchar",	length: 30,		minLength: 2, required: true,	visible: true,	searchable: true, label: "Nombre Documento", toUpperLowerCase: true, remote_check: "SELECT count(1) as existe FROM tipo_documento WHERE nombre = ? "}
+         ]
+      },
+	  {
          name: "pagestatica",
 		 title: "Paginas Estaticas del Sitio Web",
 		 table: "pagina_estatica",
@@ -174,7 +188,7 @@ exports.models =
             {col: "nombre",				type: "varchar",	length: 30,		minLength: 3, required: true,	visible: true,	searchable: true,	label: "Nombre",	placeholder: "Ingrese un Nombre"},
 			{col: "apellido",			type: "varchar",	length: 30,		minLength: 3, required: true,	visible: true,	searchable: true,	label: "Apellido",	placeholder: "Ingrese un Apellido"},
 //			{col: "password",			type: "varchar",	length: 20,		minLength: 6, required: true,	visible: false,	searchable: false,	label: "Password",	allowNoEdit: true, placeholder: "Defina el Password", treatIns: "MD5('?')"},
-			{col: "perfil",				type: "varchar",	length: 30,		minLength: 0, required: true,	visible: true,	searchable: true,	label: "Perfil", 	list: [{val:"admin", label:"Administrador"},{val:"operador", label:"Operador"}]}
+			{col: "perfil",				type: "varchar",	length: 30,		minLength: 0, required: true,	visible: true,	searchable: true,	label: "Perfil", 	list: [{val:"admin", label:"Administrador"},{val:"operador", label:"Operador"},{val:"editor", label:"Editor"}]}
          ]
       },
 	  {
@@ -187,7 +201,7 @@ exports.models =
 		 sql_new: " SELECT * FROM cuidador ",
 		 sql_delete : " DELETE FROM cuidador WHERE carnet = ? ",
          columns: [
-            {col: "carnet",				type: "varchar",	length: 9,		minLength: 9, required: true,	visible: true,	searchable: true, 	label: "Carnet", 	placeholder: "AAYYYY### Iniciales, Año y Correlativo", pattern:"[A-Z]{{2}}[0-9]{{7}}", toUpperLowerCase: true, allowNoEdit: true, 	remote_check: "SELECT count(1) as existe FROM cuidador WHERE carnet = ? "}, 
+            {col: "carnet",				type: "varchar",	length: 9,		minLength: 9, required: true,	visible: true,	searchable: true, 	label: "Carnet", 	placeholder: "AAYYYY### Iniciales, Año y Correlativo", pattern:"[A-Z]{{2}}[0-9]{{7}}", toUpperLowerCase: true, allowNoEdit: true, remote_check: "SELECT count(1) as existe FROM cuidador WHERE carnet = ? ", ignoreNew: true}, 
             {col: "nombre",				type: "varchar",	length: 30,		minLength: 3, required: true,	visible: true,	searchable: true,	label: "Nombre",	placeholder: "Ingrese un Nombre"},
 			{col: "apellido",			type: "varchar",	length: 30,		minLength: 3, required: true,	visible: true,	searchable: true,	label: "Apellido",	placeholder: "Ingrese un Apellido"},
 			{col: "id_pais",			type: "varchar",	length: 3,		minLength: 3, required: true,	visible: false, searchable: false,	label: "Pais",		placeholder: "Ingrese un Pais", dropdownlist: " SELECT iso3 as cod, nombre FROM pais "},
@@ -195,7 +209,9 @@ exports.models =
 			{col: "direccion",			type: "varchar",	length: 80,		minLength: 10, required: false,	visible: false, searchable: false, 	label: "Direccion", placeholder: "Ingrese una Direccion"},
 			{col: "correo",				type: "varchar",	length: 40,		minLength: 5, required: true,	visible: false,	searchable: false, 	label: "Correo", 	email_check: true},
 			{col: "telefono",			type: "varchar",	length: 8,		minLength: 8, required: true,	visible: true,	searchable: true, 	label: "Telefono",	placeholder: "########", pattern:"[0-9]{{8}}"},
-			{col: "id_profesion",		type: "varchar",	length: 2,		minLength: 1, required: true,	visible: false,	searchable: true, 	label: "Profesión", dropdownlist: "SELECT id as cod, descripcion as nombre FROM profesion"}
+			{col: "id_profesion",		type: "varchar",	length: 2,		minLength: 1, required: true,	visible: false,	searchable: false, 	label: "Profesión", dropdownlist: "SELECT id as cod, descripcion as nombre FROM profesion"},
+			{col: "id_tipo_documento",	type: "varchar",	length: 2,		minLength: 1, required: true,	visible: false,	searchable: false, 	label: "Tipo Documento", dropdownlist: "SELECT id as cod, nombre FROM tipo_documento "},
+			{col: "documento",			type: "varchar",	length: 20,		minLength: 5, required: true,	visible: false, searchable: false, 	label: "Documento", placeholder: "Documento Identidad", remote_check: "SELECT count(1) as existe FROM cuidador WHERE documento = ? "}
          ]
       },
 	  {
@@ -209,31 +225,33 @@ exports.models =
 		 sql_delete : " DELETE FROM paciente WHERE carnet = ? ",
 		 parent: "cuidador",
          columns: [
-            {col: "carnet",				type: "varchar",	length: 9,		minLength: 9, required: true,	visible: true,	searchable: true, 	label: "Carnet", 	placeholder: "AAYYYY### Iniciales, Año y Correlativo", pattern:"[A-Z]{{2}}[0-9]{{7}}", toUpperLowerCase: true, allowNoEdit: true, remote_check: "SELECT count(1) as existe FROM paciente WHERE carnet = ? "}, 
+            {col: "carnet",				type: "varchar",	length: 9,		minLength: 9, required: true,	visible: true,	searchable: true, 	label: "Carnet", 	placeholder: "AAYYYY### Iniciales, Año y Correlativo", pattern:"[A-Z]{{2}}[0-9]{{7}}", toUpperLowerCase: true, allowNoEdit: true, remote_check: "SELECT count(1) as existe FROM paciente WHERE carnet = ? ", ignoreNew: true}, 
             {col: "nombre",				type: "varchar",	length: 30,		minLength: 3, required: true,	visible: true,	searchable: true,	label: "Nombre",	placeholder: "Ingrese un Nombre"},
 			{col: "apellido",			type: "varchar",	length: 30,		minLength: 3, required: true,	visible: true,	searchable: true,	label: "Apellido",	placeholder: "Ingrese un Apellido"},
-			{col: "id_cuidador",		type: "varchar",	length: 9,		minLength: 9, required: true,	visible: true,	searchable: true, 	label: "Cuidador", 	allowNoEdit: true, 	dropdownlist: "SELECT carnet as cod, CONCAT(carnet, '-', apellido, ', ', nombre)  as nombre FROM cuidador "}, 
+			{col: "id_cuidador",		type: "varchar",	length: 9,		minLength: 9, required: true,	visible: true,	searchable: true, 	label: "Cuidador", 	allowNoEdit: true, 	dropdownlist: "SELECT carnet as cod, CONCAT(carnet, '-', apellido, ', ', nombre)  as nombre FROM cuidador "},
+			{col: "id_parentesco",		type: "varchar",	length: 2,		minLength: 1, required: true,	visible: false,	searchable: false, label: "Parentesco con Cuidador", dropdownlist: "SELECT id as cod, descripcion as nombre FROM parentesco"},
 			{col: "id_pais",			type: "varchar",	length: 3,		minLength: 3, required: true,	visible: false,  searchable: false, label: "Pais",		dropdownlist: " SELECT iso3 as cod, nombre FROM pais "},
 			{col: "id_departamento",	type: "varchar",	length: 3,		minLength: 3, required: true,	visible: false, searchable: false, label: "Departamento",	dropdownlist: " SELECT id as cod, descripcion_ciudad as nombre FROM ciudad_depto "},
-			{col: "id_profesion",		type: "varchar",	length: 2,		minLength: 1, required: false,	visible: false,	searchable: false, label: "Profesión Diagnosticado", dropdownlist: "SELECT id as cod, descripcion as nombre FROM profesion"},
-			{col: "id_parentesco",		type: "varchar",	length: 2,		minLength: 1, required: false,	visible: false,	searchable: false, label: "Parentesco con Cuidador", dropdownlist: "SELECT id as cod, descripcion as nombre FROM parentesco"},
-			{col: "edad_medicacion",	type: "int",		length: 99,		minLength: 1, required: false,	visible: false,	searchable: false, label: "Edad Diagnosticado"},
-			{col: "fec_nacimiento",		type: "date",		length: 0,		minLength: 4, required: false,	visible: false,	searchable: false, 	label: "Fecha Nacimiento", min: "1940-01-01", max: "2040-12-31"},
+			{col: "id_profesion",		type: "varchar",	length: 2,		minLength: 1, required: true,	visible: false,	searchable: false, label: "Profesión Diagnosticado", dropdownlist: "SELECT id as cod, descripcion as nombre FROM profesion"},
+			{col: "fec_nacimiento",		type: "date",		length: 0,		minLength: 4, required: true,	visible: false,	searchable: false, 	label: "Fecha Nacimiento", min: "1940-01-01", max: "2040-12-31"},
+			{col: "id_tipo_documento",	type: "varchar",	length: 2,		minLength: 1, required: true,	visible: false,	searchable: false, 	label: "Tipo Documento", dropdownlist: "SELECT id as cod, nombre FROM tipo_documento "},
+			{col: "documento",			type: "varchar",	length: 20,		minLength: 5, required: true,	visible: false, searchable: false, 	label: "Documento", placeholder: "Documento Identidad", remote_check: "SELECT count(1) as existe FROM paciente WHERE documento = ? "},
+			{col: "edad_medicacion",	type: "int",		length: 99,		minLength: 1, required: true,	visible: false,	searchable: false, label: "Edad Diagnosticado"},
 			{col: "medicacion",			type: "textarea",	length: 300,	minLength: 4, required: false,	visible: false,	searchable: false, 	label: "Otras Demencias"}
          ]
       },
 	  {
          name: "med_paciente",
 		 title: "Medicamentos por Paciente",
-		 table: "medicacion_paciente",
-         primary_key: ["carnet", "id_medicamento"],
-		 sql_select: " SELECT * FROM med_paciente ",
-		 sql_edit: " SELECT * FROM med_paciente WHERE id = ? ",
-		 sql_new: " SELECT * FROM med_paciente ",
-		 sql_delete : " DELETE FROM med_paciente WHERE id = ? ",
+		 table: "med_paciente",
+         primary_key: ["id_paciente", "id_medicamento"],
+		 sql_select: " SELECT id_paciente, id_medicamento, observacion FROM med_paciente ",
+		 sql_edit: " SELECT id_paciente, id_medicamento, observacion FROM med_paciente WHERE CONCAT(id_paciente,'-',id_medicamento) = ? ",
+		 sql_new: " SELECT id_paciente, id_medicamento, observacion FROM med_paciente ",
+		 sql_delete : " DELETE FROM med_paciente WHERE CONCAT(id_paciente,'-',id_medicamento) = ? ",
          columns: [
-			{col: "carnet",				type: "varchar",	length: 9,		minLength: 9, required: true,	visible: true,	searchable: true, 	label: "Carnet", dropdownlist: " SELECT carnet as cod, CONCAT(carnet, '-', apellido, ', ', nombre) as nombre FROM paciente "}, 
-			{col: "id_medicamento",		type: "varchar",	length: 10,		minLength: 2, required: true,	visible: true,  searchable: true,	label: "Medicamento", dropdownlist: " SELECT codigo as cod, descripcion as nombre FROM medicamento "},
+			{col: "id_paciente",		type: "varchar",	length: 9,		minLength: 9, required: true,	visible: true,	searchable: true, 	label: "Carnet", allowNoEdit: true, dropdownlist: " SELECT carnet as cod, CONCAT(carnet, '-', apellido, ', ', nombre) as nombre FROM paciente "}, 
+			{col: "id_medicamento",		type: "varchar",	length: 10,		minLength: 2, required: true,	visible: true,  searchable: true,	label: "Medicamento", allowNoEdit: true, dropdownlist: " SELECT codigo as cod, descripcion as nombre FROM medicamento "},
 			{col: "observacion",		type: "varchar",	length: 80,		minLength: 4, required: false,	visible: true,	searchable: true, 	label: "Comentario"}
          ]
       },
@@ -282,13 +300,16 @@ exports.models =
 		 sql_edit: " SELECT * FROM colaborador WHERE codigo = ? ",
 		 sql_new: " SELECT * FROM colaborador ",
 		 sql_delete : " DELETE FROM colaborador WHERE codigo = ? ",
+		 toolbar: [{button: "ButtonCarta", title: "Carta Colaborador", icon: "fa fa-envelope-o", URL: "/rpt/carta", verbo: "GET"}],
          columns: [
             {col: "codigo",				type: "varchar",	length: 8,		minLength: 4, required: true,	visible: true,	searchable: true, 	label: "Codigo",	placeholder: "AA-##### Codigo - Correlativo", pattern:"[A-Z]{{2}}-[0-9]{{5}}", toUpperLowerCase: true, allowNoEdit: true, remote_check: "SELECT count(1) as existe FROM colaborador WHERE codigo = ? "},
 			{col: "id_institucion",		type: "varchar",	length: 10,		minLength: 1, required: true,	visible: true,  searchable: true,	label: "Institucion", dropdownlist: " SELECT codigo as cod, CONCAT(codigo, '-', descripcion) as nombre FROM institucion "},
 			{col: "nombre",				type: "varchar",	length: 30,		minLength: 0, required: true,	visible: true,	searchable: true, 	label: "Nombres",	placeholder: "Ingrese un Nombre"},
 			{col: "apellido",			type: "varchar",	length: 30,		minLength: 0, required: true,	visible: true,	searchable: true, 	label: "Apellidos",	placeholder: "Ingrese un Apellido"},
 			{col: "telefono",			type: "varchar",	length: 8,		minLength: 8, required: true,	visible: true,	searchable: true, 	label: "Telefono",	placeholder: "########", pattern:"[0-9]{{8}}"},
-			{col: "correo",				type: "varchar",	length: 40,		minLength: 5, required: true,	visible: false,	searchable: false, 	label: "Correo", 	email_check: true}
+			{col: "correo",				type: "varchar",	length: 40,		minLength: 5, required: true,	visible: false,	searchable: false, 	label: "Correo", 	email_check: true},
+			{col: "id_tipo_documento",	type: "varchar",	length: 2,		minLength: 1, required: true,	visible: false,	searchable: false, 	label: "Tipo Documento", dropdownlist: "SELECT id as cod, nombre FROM tipo_documento "},
+			{col: "documento",			type: "varchar",	length: 20,		minLength: 5, required: true,	visible: true, searchable: true, 	label: "Documento", placeholder: "Documento Identidad"}
          ]
       },
       {
@@ -296,15 +317,37 @@ exports.models =
 		 title: "Capacitaciones",
 		 table: "capacitacion",
          primary_key: ["codigo"],
-		 sql_select: " SELECT * FROM capacitacion ",
+		 sql_select: " SELECT codigo, nombre, duracion, DATE_FORMAT(fec_emision, '%d-%m-%Y') fec_emision, descripcion FROM capacitacion ",
 		 sql_edit: " SELECT * FROM capacitacion WHERE codigo = ? ",
 		 sql_new: " SELECT * FROM capacitacion ",
 		 sql_delete : " DELETE FROM capacitacion WHERE codigo = ? ",
+		 toolbar: [{button: "ButtonCertificado", title: "Certificados", icon: "fa fa-bookmark-o", URL: "/rpt/certificado", verbo: "GET"}],
          columns: [
-            {col: "codigo",				type: "varchar",	length: 8,		minLength: 8, required: true,	visible: true,	searchable: true, 	label: "Codigo",		placeholder: "AA-##### Codigo - Correlativo", pattern:"[A-Z]{{2}}-[0-9]{{5}}", toUpperLowerCase: true, allowNoEdit: true, remote_check: "SELECT count(1) as existe FROM capacitacion WHERE codigo = ? "},
-			{col: "nombre",				type: "varchar",	length: 80,		minLength: 0, required: true,	visible: true,	searchable: true, 	label: "Nombres",		placeholder: "Ingrese un Nombre"},
-			{col: "duracion",			type: "int",		length: 3,		minLength: 1, required: true,	visible: true,	searchable: true,	label: "Duracion (horas)",		placeholder: "0", pattern: "[0-9]{{3}}" },
+            {col: "codigo",				type: "varchar",	length: 8,		minLength: 8, required: true,	visible: true,	searchable: true, 	label: "Codigo", placeholder: "AA-##### Codigo - Correlativo", pattern:"[A-Z]{{2}}-[0-9]{{5}}", toUpperLowerCase: true, allowNoEdit: true, remote_check: "SELECT count(1) as existe FROM capacitacion WHERE codigo = ? "},
+			{col: "nombre",				type: "varchar",	length: 80,		minLength: 0, required: true,	visible: true,	searchable: true, 	label: "Nombres", placeholder: "Ingrese un Nombre"},
+			{col: "duracion",			type: "int",		length: 3,		minLength: 1, required: true,	visible: true,	searchable: true,	label: "Duracion (horas)", placeholder: "0", pattern: "[0-9]{{3}}" },
+			{col: "fec_emision",		type: "date",		length: 0,		minLength: 4, required: true,	visible: true,	searchable: true,	label: "Fecha Emision"},
 			{col: "descripcion",		type: "varchar",	length: 80,		minLength: 0, required: false,	visible: false,	searchable: false,	label: "Descripcion",	placeholder: "Ingrese una Descripcion"}
+         ]
+      },
+      {
+         name: "alumno",
+		 title: "Alumno por Capacitacion",
+		 table: "alumno",
+         primary_key: ["id_capacitacion", "dui"],
+		 sql_select: " SELECT * FROM alumno ",
+		 sql_edit: " SELECT * FROM alumno WHERE CONCAT(id_capacitacion,'-',dui) = ? ",
+		 sql_new: " SELECT * FROM alumno ",
+		 sql_delete : " DELETE FROM alumno WHERE CONCAT(id_capacitacion,'-',dui) = ? ",
+         columns: [
+			{col: "id_capacitacion",	type: "varchar",	length: 8,		minLength: 8, required: true,	visible: true,  searchable: true,	label: "Capacitacion", allowNoEdit: true, dropdownlist: " SELECT codigo as cod, CONCAT(codigo, '-', nombre) as nombre FROM capacitacion "},
+			{col: "dui",				type: "varchar",	length: 10,		minLength: 10, required: true,	visible: false, searchable: false, 	label: "Documento", placeholder: "########-#", pattern:"[0-9]{{8}}-[0-9]{{1}}", allowNoEdit: true},
+			{col: "nombre",				type: "varchar",	length: 30,		minLength: 1, required: true,	visible: true,	searchable: true, 	label: "Nombres",		placeholder: "Ingrese un Nombre"},
+			{col: "apellido",			type: "varchar",	length: 30,		minLength: 1, required: true,	visible: true,	searchable: true, 	label: "Apellido",		placeholder: "Ingrese un Apellido"},
+			{col: "correo",				type: "varchar",	length: 40,		minLength: 5, required: true,	visible: false,	searchable: false, 	label: "Correo", 	email_check: true},
+			{col: "id_pais",			type: "varchar",	length: 3,		minLength: 3, required: true,	visible: false, searchable: false,	label: "Pais",		placeholder: "Ingrese un Pais", dropdownlist: " SELECT iso3 as cod, nombre FROM pais "},
+			{col: "id_departamento",	type: "varchar",	length: 3,		minLength: 3, required: true,	visible: false, searchable: false, 	label: "Departamento", placeholder: "Ingrese un Departamento",	dropdownlist: " SELECT id as cod, descripcion_ciudad as nombre FROM ciudad_depto "},
+			{col: "direccion",			type: "varchar",	length: 100,	minLength: 10, required: false,	visible: false, searchable: false, 	label: "Direccion", placeholder: "Ingrese una Direccion"}
          ]
       },
       {
@@ -322,5 +365,65 @@ exports.models =
 			{col: "descripcion",		type: "varchar",	length: 80,		minLength: 0, required: false,	visible: false,	searchable: false,	label: "Descripcion",	placeholder: "Ingrese una Descripcion"}
          ]
       },
+      {
+         name: "reg_asistencia",
+		 title: "Reg. Asistencia Evento",
+		 table: "reg_asistencia",
+         primary_key: ["id"],
+		 sql_select: " SELECT * FROM reg_asistencia ",
+		 sql_edit: " SELECT * FROM reg_asistencia WHERE id = ? ",
+		 sql_new: " SELECT * FROM reg_asistencia ",
+		 sql_delete : " DELETE FROM reg_asistencia WHERE id = ? ",
+         columns: [
+            {col: "id_evento",			type: "int",		length: 99,		minLength: 1, required: true,	visible: true,	searchable: true, 	label: "ID Evento", 	allowNoEdit: true, remote_check: "SELECT count(1) as existe FROM proyecto WHERE id = ? "},
+			{col: "id_tipo_documento",	type: "varchar",	length: 2,		minLength: 1, required: true,	visible: false,	searchable: false, 	label: "Tipo Documento", dropdownlist: "SELECT id as cod, nombre FROM tipo_documento "},
+			{col: "documento",			type: "varchar",	length: 20,		minLength: 5, required: true,	visible: true, searchable: true, 	label: "Documento", placeholder: "Documento Identidad"},
+			{col: "nombre",				type: "varchar",	length: 30,		minLength: 3, required: true,	visible: true,	searchable: true,	label: "Nombre",	placeholder: "Ingrese un Nombre"},
+			{col: "apellido",			type: "varchar",	length: 30,		minLength: 3, required: true,	visible: true,	searchable: true,	label: "Apellido",	placeholder: "Ingrese un Apellido"},
+			{col: "carnet",				type: "varchar",	length: 9,		minLength: 9, required: false,	visible: false,	searchable: false, 	label: "Carnet Asociacion"},
+			{col: "tarjeta",			type: "varchar",	length: 20,		minLength: 3, required: false,	visible: false,	searchable: false,	label: "tarjeta",	placeholder: "Ingrese un Numero de Tarjeta"},
+			{col: "id_pais",			type: "varchar",	length: 3,		minLength: 3, required: true,	visible: false,  searchable: false, label: "Pais",		dropdownlist: " SELECT iso3 as cod, nombre FROM pais "},
+			{col: "id_departamento",	type: "varchar",	length: 3,		minLength: 3, required: true,	visible: false, searchable: false, label: "Departamento",	dropdownlist: " SELECT id as cod, descripcion_ciudad as nombre FROM ciudad_depto "},
+			{col: "direccion",			type: "varchar",	length: 100,	minLength: 10, required: false,	visible: false, searchable: false, 	label: "Direccion", placeholder: "Ingrese una Direccion"},
+			{col: "correo",				type: "varchar",	length: 40,		minLength: 5, required: true,	visible: true,	searchable: true, 	label: "Correo", 	email_check: true},
+			{col: "telefono",			type: "varchar",	length: 8,		minLength: 8, required: true,	visible: true,	searchable: true, 	label: "Telefono",	placeholder: "########", pattern:"[0-9]{{8}}"},
+			{col: "comentario",			type: "varchar",	length: 80,		minLength: 3, required: false,	visible: false,	searchable: false,	label: "comentario",	placeholder: "Comentarios"}			
+         ]
+      },
+      {
+         name: "ctrlasistencia",
+		 title: "Control de Asistencia",
+		 table: "ctrlasistencia",
+         primary_key: ["id"],
+		 sql_select: " SELECT id, id_proyecto, id_colaborador, DATE_FORMAT(fec_evento, '%d-%m-%Y') fec_evento, hora_entrada, hora_salida, total_horas FROM ctrlasistencia ",
+		 sql_edit: " SELECT * FROM ctrlasistencia WHERE id = ? ",
+		 sql_new: " SELECT * FROM ctrlasistencia ",
+		 sql_delete : " DELETE FROM ctrlasistencia WHERE id = ? ",
+         columns: [
+            {col: "id",					type: "int",		length: 5,		minLength: 1, required: true,	visible: true,	searchable: true, label: "Id", allowNoEdit: true, ignoreNew: true, step: 1, min:1, max: 999},
+			{col: "id_proyecto",		type: "varchar",	length: 3,		minLength: 3, required: true,	visible: true,  searchable: true, label: "Proyecto", dropdownlist: " SELECT id as cod, nombre FROM proyecto "},
+			{col: "id_colaborador",		type: "varchar",	length: 3,		minLength: 3, required: true,	visible: true,  searchable: true, label: "Colaborador", dropdownlist: " SELECT codigo as cod, CONCAT(apellido,', ',nombre) as nombre FROM colaborador "},
+			{col: "fec_evento",			type: "date",		length: 0,		minLength: 4, required: true,	visible: true,	searchable: true,	label: "Fecha Evento"},
+			{col: "hora_entrada",		type: "time",		length: 100,	minLength: 4, required: true,	visible: false,	searchable: false,	label: "Hora Entrada"},
+			{col: "hora_salida",		type: "time",		length: 100,	minLength: 4, required: true,	visible: false,	searchable: false,	label: "Hora Salida"}
+         ]
+      },
+      {
+         name: "agenda",
+		 title: "Agenda",
+		 table: "agenda",
+         primary_key: ["id"],
+		 sql_select: " SELECT * FROM agenda ",
+		 sql_edit: " SELECT * FROM agenda WHERE id = ? ",
+		 sql_new: " SELECT * FROM agenda ",
+		 sql_delete : " DELETE FROM agenda WHERE id = ? ",
+		 
+         columns: [
+            {col: "id",					type: "int",		length: 5,		minLength: 1, required: true,	visible: true,	searchable: true, label: "Id", allowNoEdit: true, ignoreNew: true, step: 1, min:1, max: 999},
+			{col: "id_evento",			type: "varchar",	length: 3,		minLength: 3, required: true,	visible: true,  searchable: true, label: "Evento", dropdownlist: " SELECT id as cod, titulo as nombre FROM evento "},
+            {col: "descripcion",		type: "varchar",	length: 80,		minLength: 2, required: true,	visible: true,	searchable: true, label: "descripcion", placeholder: "Ingrese una Descripcion"},
+			{col: "hora_ini",			type: "time",		length: 100,	minLength: 4, required: true,	visible: false,	searchable: false,	label: "Hora"}
+         ]
+      }
    ]
 }

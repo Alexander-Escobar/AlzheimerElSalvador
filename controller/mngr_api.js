@@ -29,7 +29,7 @@ exports.putMtto = function (a_req, a_resp, a_entity)
 		
 		for (var i=0; i < dbModel.models.tables.length; i++)
 		{
-			if (dbModel.models.tables[i].table === a_entity)
+			if (dbModel.models.tables[i].name === a_entity)
 			{
 				l_entity = dbModel.models.tables[i]; 
 				var l_sql = " UPDATE " + l_entity.table + " SET ";
@@ -87,6 +87,7 @@ exports.putMtto = function (a_req, a_resp, a_entity)
 	})
 }
 
+
 // Mantenimiento POS Insert/Create
 exports.postMtto = function (a_req, a_resp, a_entity)
 {
@@ -113,15 +114,26 @@ exports.postMtto = function (a_req, a_resp, a_entity)
 		{
 			for (var i=0; i < dbModel.models.tables.length; i++)
 			{
-				if (dbModel.models.tables[i].table === a_entity)
+				if (dbModel.models.tables[i].name === a_entity)
 				{
 					l_entity = dbModel.models.tables[i]; 
 					var l_sql = " INSERT INTO " + l_entity.table ;
-					var l_sql_col = l_entity.columns.map(getCol).toString();
+					//var l_sql_col = l_entity.columns.map(getCol).toString();
+					var l_sql_col = l_entity.columns.filter(function(value, index, array)
+															{
+																if (value.hasOwnProperty('ignoreNew'))
+																{ return !value.ignoreNew;}
+																return true;
+															}
+															).map(getCol).toString();  
+
 					var l_sql_val = [];
 					
 					for (j=0; j < l_entity.columns.length; j++)
 					{ 
+						if (l_entity.columns[j].hasOwnProperty('ignoreNew'))
+						{ continue;}
+					
 						switch (l_entity.columns[j].type)
 						{
 							case "int":
@@ -143,6 +155,10 @@ exports.postMtto = function (a_req, a_resp, a_entity)
 					}
 					
 					l_sql = l_sql + " (" + l_sql_col + ") VALUES (" + l_sql_val + ")";
+					console.log("l_sql");
+					console.log(l_sql);
+					console.log("jsonContent");
+					console.log(jsonContent);
 					
 					db.executeSQL(l_sql, function(a_data, err)
 					{

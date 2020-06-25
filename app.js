@@ -1,4 +1,4 @@
-// Generales
+﻿// Generales
 var http = require('http');
 var fs = require('fs'); //fileSystem
 var qs = require('querystring');
@@ -111,6 +111,13 @@ var server = http.createServer(function (req, resp)
 				//case "sitemap.xml":	// sitemap.xml
 				//	Manager.GetSiteMap(req, resp);
 				//	break;
+				
+				// rpt
+				case "rpt":
+					var l_userPath = '[a-zA-Z0-9._-]+';
+					var path = new RegExp("/rpt/"+l_userPath);
+					Manager_Sys.getRpt(req, resp, l_path[2], l_path[3]);
+				break;
 
 				// SYS
 				case "sys":
@@ -155,18 +162,27 @@ var server = http.createServer(function (req, resp)
 									{
 										l_opc = dbModel.models.tables[i].name;
 										
-										//console.log('sys default');
-										//console.log(l_opc);
-										//console.log(l_path[2]);
+										console.log('sys default OPC - path');
+										console.log(l_opc);
+										console.log(l_path[2]);
 										
 										if (l_opc === l_path[2])
-										{ Manager_Sys.getMtto(req, resp, l_opc); }
+										{ 
+											Manager_Sys.getMtto(req, resp, l_opc);
+											break;
+										}
 										
 										if (l_path[2].endsWith("_new") && l_opc === l_path[2].substring(0, l_path[2].length - 4))
-										{ Manager_Sys.getMtto_new(req, resp, l_opc); }
+										{ 
+											Manager_Sys.getMtto_new(req, resp, l_opc);
+											break;
+										}
 										
 										if (l_path[2].endsWith("_edit") && l_opc === l_path[2].substring(0, l_path[2].length - 5))
-										{ Manager_Sys.getMtto_edit(req, resp, l_opc, l_path[3]); }
+										{ 
+											Manager_Sys.getMtto_edit(req, resp, l_opc, l_path[3]);
+											break;
+										}
 									}
 								break;
 							}
@@ -207,15 +223,9 @@ var server = http.createServer(function (req, resp)
 					}
 					else	// Sesion NO Autenticada
 					{ Manager_Sys.getLogin(req, resp, l_session); }
-						
 
 					break;	//  "sys"
-				
-				
 
-				
-
-				
 				
 				case "api":
 					if (req.url === '/api/categoria') 
@@ -334,7 +344,8 @@ var server = http.createServer(function (req, resp)
 			//	Create	
 			//	201 (Created), 'Location' header with link to /customers/{id} containing new ID.	
 			//	404 (Not Found), 409 (Conflict) if resource already exists.
-
+			console.log("POST: %s",req.url);
+			
 			switch(l_path[1])
 			{
 				//case "root":

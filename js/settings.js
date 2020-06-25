@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Configuracion y Parametrizacion general de la Aplicacion & Sitio Web
 	
 	Listado:
@@ -21,7 +21,7 @@ exports.dbConfig =
 exports.servConfig = 
 {
 	hostname: "",	// "www.AlzheimerElSalvador.org" http://localhost:9000
-	webPort: 80,	//  9000
+	webPort: 80,	// 9000
 	debug: false
 };
 
@@ -179,14 +179,45 @@ exports.pagConfig =
 		// matrices en la que la primera matriz se usa para definir las opciones de valor y la segunda matriz las opciones mostradas 
 		// (útil para cadenas de idioma como 'Todos, si se omite la segunda matriz, la primera sera utilizada para ambos casos.
 		
-	buttons_default: "'csv', 'excel', 'pdf', 'print'",
+	buttons_default: "{"+
+						"extend:    'excelHtml5',"+
+						"text:      '<i class=\"fa fa-file-excel-o fa-2x\" ></i>',"+
+						"titleAttr: 'Excel'"+
+						"}, " +
+						"{"+
+						"extend:    'print',"+
+						"text:      '<i class=\"fa fa-print fa-2x\" ></i>',"+
+						"titleAttr: 'Imprimir'"+
+						"} ",
 		// Botones por defecto
 		// 'copy', 'csv', 'excel', 'pdf', 'print'
+	    //    {
+        //        extend:    'copyHtml5',
+        //        text:      '<i class="fa fa-files-o"></i>',
+        //        titleAttr: 'Copy'
+        //    },
+        //    {
+        //        extend:    'excelHtml5',
+        //        text:      '<i class="fa fa-file-excel-o"></i>',
+        //        titleAttr: 'Excel'
+        //    },
+        //    {
+        //        extend:    'csvHtml5',
+        //        text:      '<i class="fa fa-file-text-o"></i>',
+        //        titleAttr: 'CSV'
+        //    },
+        //    {
+        //        extend:    'pdfHtml5',
+        //        text:      '<i class="fa fa-file-pdf-o"></i>',
+        //        titleAttr: 'PDF'
+        //    }
+	
 	
 	pagingDOM:	"<'row'<'col-sm-12 col-md-4 toolbar'><'col-sm-12 col-md-8'f>>" +
 				"<'row'<'col-sm-12'tr>>" +
-				"<'row'<'col-sm-12 col-md-9'l><'col-sm-12 col-md-3'B>>" +
+				"<'row'<'col-sm-12 col-md-10'l><'col-sm-12 col-md-2'B>>" +
 				"<'row'<'col-sm-12 col-md-6'i><'col-sm-12 col-md-6'p>>"
+				
 		// Para definir la distribucion en el DOM 
 		// Valores validos "Blfrtip"
 		//l - Length changing
@@ -196,6 +227,7 @@ exports.pagConfig =
 		//p - Pagination
 		//r - pRocessing
 		//B - Button
+		//toolbar - Objeto Personalizado Incrustado
 };
 
 exports.servMail =

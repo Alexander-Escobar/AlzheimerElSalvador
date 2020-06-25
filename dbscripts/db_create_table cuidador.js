@@ -20,7 +20,9 @@ con.connect(function(err) {
 					" direccion varchar(100), " +
 					" correo VARCHAR(40) NOT NULL, " +
 					" telefono VARCHAR(8) NOT NULL, " +
-					" id_profesion VARCHAR(2) NOT NULL " +
+					" id_profesion VARCHAR(2) NOT NULL, " +
+					" id_tipo_documento int(3) NOT NULL, " +
+					" documento VARCHAR(20) NOT NULL " +
 					" ) ";
   con.query(sql, function (err, result) {
     if (err) throw err;

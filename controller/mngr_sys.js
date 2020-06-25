@@ -2,16 +2,21 @@ var db = require('../js/db');
 var httpMsgs = require('../js/httpmsgs');
 var dbModel = require('../js/dbmodel');
 var confPanel = require('../js/confpanel');
-//var util = require('util');
+var servRPT = require('../js/servrpt');
+var dbModelRPT = require('../js/dbmodelrpt');
 
 /*
 	Gestiona y administra el BackEnd del Aplicativo, Contiene la logica para presentar al usuario los CRUD de los mantenimientos y el panel
 	
 	Listado
+	* getLogin
 	* getPanel		Panel del Sistema, muestra las opciones asociadas a un usuario
+	* getMttoRP
 	* getMtto		Grid del Mantenimiento
 	* getMtto_new	Formulario de Creacion de registros
 	* getMtto_edit	Formulario de Edicion de registros
+	* getCategoriaList		** CREO QUE NO SE USA **
+	* getRpt		Reporteador
 */
 
 exports.getLogin = function(a_req, a_resp, a_arg)
@@ -145,6 +150,7 @@ exports.getMtto_new = function  (a_req, a_resp, a_entity)
 			l_entity = dbModel.models.tables[i]; 
 			var l_sql = l_entity.sql_new;
 
+			console.log("setencia %s:", l_sql);
 			db.executeSQL(l_sql, function(data, err)
 			{
 				if (err)
@@ -204,4 +210,32 @@ exports.getCategoriaList = function (a_req, a_resp)
     });
 };
 
+exports.getRpt = function(a_req, a_resp, a_entity, a_id)
+{
+	console.log("mngr_sys getRpt");
+	
+	var l_entity = null;
+	
+	for (var i=0; i < dbModelRPT.models.report.length; i++)
+	{
+		if (dbModelRPT.models.report[i].name === a_entity)
+		{
+			l_entity = dbModelRPT.models.report[i]; 
+			var l_sql = l_entity.sql_select;
+
+			db.executeSQLarray(l_sql, [a_id], function(data, err)
+			{
+				if (err)
+				{httpMsgs.show500(a_req, a_resp, err);}
+				else
+				{
+					servRPT.GetReport(a_req, a_resp, data, l_entity);
+				}
+			});
+		}
+	}
+
+	if (l_entity === null)
+	{ httpMsgs.show500(a_req, a_resp, "Opcion de Reporte NO encontrada"); }
+}
 

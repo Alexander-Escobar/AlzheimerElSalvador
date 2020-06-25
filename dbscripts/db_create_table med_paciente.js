@@ -11,12 +11,11 @@ var con = mysql.createConnection({
 con.connect(function(err) {
   if (err) throw err;
   console.log("Connected!");
-  var sql = " CREATE TABLE capacitacion (" + 
-					" codigo char(8) PRIMARY KEY, " +
-					" nombre VARCHAR(80) NOT NULL, " +
-					" duracion int(3) NOT NULL, " +
-					" fec_emision date NOT NULL, " +
-					" descripcion VARCHAR(200) " +
+  var sql = " CREATE TABLE med_paciente (" + 
+  					" id_paciente VARCHAR(9) NOT NULL, " +
+					" id_medicamento VARCHAR(10) NOT NULL, " +
+					" observacion VARCHAR(80), " +
+					" PRIMARY KEY (id_paciente, id_medicamento) " +
 					" ) ";
   con.query(sql, function (err, result) {
     if (err) throw err;

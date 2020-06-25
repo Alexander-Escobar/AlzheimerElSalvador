@@ -11,20 +11,16 @@ var con = mysql.createConnection({
 con.connect(function(err) {
   if (err) throw err;
   console.log("Connected!");
-  var sql = " CREATE TABLE paciente (" + 
-					" carnet varchar(9) NOT NULL, " +
+  var sql = " CREATE TABLE alumno (" + 
+					" id_capacitacion char(8) NOT NULL, " +
+					" dui varchar(10) NOT NULL, " +
 					" nombre VARCHAR(30) NOT NULL, " +
 					" apellido VARCHAR(30) NOT NULL, " +
-					" id_cuidador varchar(9) NOT NULL, " +
-					" id_parentesco VARCHAR(2), " +
+					" correo VARCHAR(40) NOT NULL, " +
 					" id_pais VARCHAR(3) NOT NULL, " +
 					" id_departamento int(3) NOT NULL, " +
-					" id_profesion VARCHAR(2), " +
-					" fec_nacimiento date, " +
-					" id_tipo_documento int(3) NOT NULL, " +
-					" documento VARCHAR(20) NOT NULL, " +
-					" edad_medicacion int(2), " +
-					" medicacion VARCHAR(300)  " +
+					" direccion varchar(100), " +
+					" PRIMARY KEY (id_capacitacion, dui) " +
 					" ) ";
   con.query(sql, function (err, result) {
     if (err) throw err;

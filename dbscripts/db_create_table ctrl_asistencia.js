@@ -11,12 +11,14 @@ var con = mysql.createConnection({
 con.connect(function(err) {
   if (err) throw err;
   console.log("Connected!");
-  var sql = " CREATE TABLE capacitacion (" + 
-					" codigo char(8) PRIMARY KEY, " +
-					" nombre VARCHAR(80) NOT NULL, " +
-					" duracion int(3) NOT NULL, " +
-					" fec_emision date NOT NULL, " +
-					" descripcion VARCHAR(200) " +
+  var sql = " CREATE TABLE ctrlasistencia (" + 
+					" id int PRIMARY KEY AUTO_INCREMENT, " +
+					" id_proyecto int NOT NULL, " +
+					" id_colaborador char(8) NOT NULL, " +
+					" fec_evento date NOT NULL, " +
+					" hora_entrada time NOT NULL, " +
+					" hora_salida time NOT NULL, " +
+					" total_horas int(3) GENERATED ALWAYS AS (HOUR(TIMEDIFF(hora_entrada, hora_salida))) VIRTUAL " +
 					" ) ";
   con.query(sql, function (err, result) {
     if (err) throw err;
