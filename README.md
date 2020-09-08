@@ -36,3 +36,48 @@ Librerias Auxiliares
   * Export buttons html5 1.5.2
   * Export buttons print 1.5.2
   
+Pasos:
+1. Creacion del Servidor en GCP
+   * f1-micro (N1 primera Generacion)
+   * ubuntu 16.04 LTS (testeado desde la v14)
+   * Permitir trafico HTTP
+   * Disco Estandar (10 GB)
+2. Configurar la Direccion IP a Estatica/Reservada
+3. Instalar dependencias y actualizar paquetes
+   - Actualizar los paquetes y el OS
+   > $ sudo apt-get update
+   - Instalar Node JS V12 & npm V6
+   > $ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+   > $ sudo apt-get install -y nodejs
+   > $ nodejs -v
+   > $ npm -v
+4. Creacion del Proyecto
+    * Creacion del espacio de trabajo
+    > $ sudo mkdir $HOME/alzheimer
+    - Creacion del Proyecto
+    > $ sudo npm init
+    - Instalacion de las Dependencias
+    > $ npm install XXXX <br>
+    > $ npm install nodemailer <br>
+    > $ npm install stringbuilder
+5. Instalar y Configurar Git & GitHub
+    * Instalar Git
+    > $ sudo apt-get install git
+    * Configurando Git
+    > \# remplazar el usuario Alexander-Escobar <br>
+    > $ git config --global user.name "user_name" <br> <br>
+    > \# remplazar el correo alexander.enrique.escobar@gmail.com <br>
+    > $ git config --global user.email "email_id" <br> <br>
+    > remplazar con la carpeta de trabajo "grupolexar" <br>
+    > $ git init "nombre_carpeta" <br> <br>
+    > Cambiarse a la carpeta de trabajo "grupolexar" <br>
+    > $ cd "nombre_carpeta" <br> <br>
+    > \# Agregando un Origen Remoto llamado "origin" <br>
+    > $ sudo git remote add origin https://github.com/Alexander-Escobar/GrupoLexar <br> <br>
+    > \# Obteniendo los Ultimos cambios <br>
+    > $ sudo git pull origin master
+6. Levantar el Servicio (cambiar IP, por la IP Interna)
+    > $ sudo nohup nodejs grupolexar/app.js --be_ip 10.142.0.2 &  <br>
+    > $ exit
+
+
