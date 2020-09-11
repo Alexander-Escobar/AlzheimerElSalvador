@@ -10,14 +10,15 @@ El sitio ha sido desarrollado con las siguientes tecnologias:
 * JavaScripts ECMAScript 2018
 * JQuery 3.3.1
 * BootStrap 4.1.2 (popper.js 1.14.3)
-* MySQL (Server) 8.0
+* MySQL (Server) 8.0 Windows / 5.7 Ubuntu
 * Node.JS (Creado Version 7, testeado en 8, 9, 10 y 12)
 
 Dependencias
 * stringbuilder 0.0.11
-* formidable 1.2.1
-* nodemailer 6.3.0
-* MySQL (Cliente) 2.15.0
+* formidable testeado 1.2.1 / 1.2.2
+* nodemailer 6.3.0 / 6.4.11
+* MySQL (Cliente) 2.15.0 / 2.18.1
+* pdf-creator-node		/ 1.4.1
 
 Librerias Auxiliares
 * validetta 1.0.1 (validettaLang-es-ES 1.0.1 Custom)
@@ -36,7 +37,7 @@ Librerias Auxiliares
   * Export buttons html5 1.5.2
   * Export buttons print 1.5.2
   
-Pasos:
+Pasos para instalar en GCP, Ubunto VERSION 14/16 LTS:
 1. Creacion del Servidor en GCP
    * f1-micro (N1 primera Generacion)
    * ubuntu 16.04 LTS (testeado desde la v14)
@@ -51,16 +52,36 @@ Pasos:
    > $ sudo apt-get install -y nodejs
    > $ nodejs -v
    > $ npm -v
-4. Creacion del Proyecto
+    
+4. Instalacion y Configuracion de la Base de Datos, compatible con en la version de Ubunto (GCP) para VERSION 14/16 LTS
+    // Definir un PASS para el usuario "root" "P@ssw0rd01"  <br>
+    // Instalar server  <br>
+    > $ sudo apt-get install mysql-server-5.7  <br>
+    // Instalar cliente  <br>
+    > $ sudo apt-get install mysql-client-5.5  <br>
+
+    // detener o levantar el servicio  <br>
+    > $ sudo service mysql [start|stop]  <br>
+
+    // Probar el servicio y coneccion  <br>
+    > $ mysql -hlocalhost -uroot -pP@ssw0rd01  <br>
+    user: "root",  <br>
+    password: "P@ssw0rd01",  <br>
+    database: "DBAlzheimer"  <br>
+
+5. Creacion del Proyecto
     * Creacion del espacio de trabajo
     > $ sudo mkdir $HOME/alzheimer
     - Creacion del Proyecto
     > $ sudo npm init
     - Instalacion de las Dependencias
-    > $ npm install XXXX <br>
+    > $ npm install stringbuilder <br>
     > $ npm install nodemailer <br>
-    > $ npm install stringbuilder
-5. Instalar y Configurar Git & GitHub
+    > $ npm install formidable <br>
+    > $ npm install pdf-creator-node <br>
+    > $ npm install mysql <br>
+
+6. Instalar y Configurar Git & GitHub
     * Instalar Git
     > $ sudo apt-get install git
     * Configurando Git
@@ -70,14 +91,14 @@ Pasos:
     > $ git config --global user.email "email_id" <br> <br>
     > remplazar con la carpeta de trabajo "grupolexar" <br>
     > $ git init "nombre_carpeta" <br> <br>
-    > Cambiarse a la carpeta de trabajo "grupolexar" <br>
+    > Cambiarse a la carpeta de trabajo "alzheimer" <br>
     > $ cd "nombre_carpeta" <br> <br>
     > \# Agregando un Origen Remoto llamado "origin" <br>
-    > $ sudo git remote add origin https://github.com/Alexander-Escobar/GrupoLexar <br> <br>
+    > $ sudo git remote add origin https://github.com/Alexander-Escobar/AlzheimerElSalvador <br> <br>
     > \# Obteniendo los Ultimos cambios <br>
     > $ sudo git pull origin master
-6. Levantar el Servicio (cambiar IP, por la IP Interna)
-    > $ sudo nohup nodejs grupolexar/app.js --be_ip 10.142.0.2 &  <br>
+7. Levantar el Servicio (cambiar IP, por la IP Interna)
+    > $ sudo nohup nodejs alzheimer/app.js --be_ip 10.128.0.4 &  <br>
     > $ exit
 
 
